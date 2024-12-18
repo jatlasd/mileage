@@ -2,8 +2,14 @@ import { getAllTrips } from '@/models/entry';
 import { CalendarDays, Clock, Car } from 'lucide-react';
 
 export default async function MileagePage() {
-  const trips = await getAllTrips();
+  let trips = [];
   
+  try {
+    trips = await getAllTrips();
+  } catch (error) {
+    console.error('Failed to fetch trips:', error);
+  }
+
   const getMileageForDateRange = (startDate) => {
     return trips
       .filter(trip => new Date(trip.startDatetime) >= startDate)
@@ -47,89 +53,94 @@ export default async function MileagePage() {
             </div>
             <div>
               <span className="text-muted-foreground mr-2">AVG</span>
-              <span className="font-mono">{(stats.ytd / trips.length).toFixed(1)}</span>
+              <span className="font-mono">{trips.length ? (stats.ytd / trips.length).toFixed(1) : '0.0'}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Trip List */}
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-muted-foreground">RECENT TRIPS</h2>
           <div className="text-sm text-muted-foreground">{trips.length} total</div>
         </div>
 
-        <div className="space-y-3">
-          {trips.map((trip) => {
-            const startTime = new Date(trip.startDatetime);
-            const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
-            const duration = endTime 
-              ? Math.round((endTime - startTime) / (1000 * 60))
-              : null;
+        {trips.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No trips recorded yet
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {trips.map((trip) => {
+              const startTime = new Date(trip.startDatetime);
+              const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
+              const duration = endTime 
+                ? Math.round((endTime - startTime) / (1000 * 60))
+                : null;
 
-            return (
-              <div 
-                key={trip._id} 
-                className="group relative bg-muted/50 rounded-lg p-4 hover:bg-muted/80 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xl">
-                        {trip.tripMiles?.toFixed(1) || '--'} mi
-                      </span>
-                      {trip.isActive && (
-                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                          Active
+              return (
+                <div 
+                  key={trip._id} 
+                  className="group relative bg-muted/50 rounded-lg p-4 hover:bg-muted/80 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xl">
+                          {trip.tripMiles?.toFixed(1) || '--'} mi
                         </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <CalendarDays className="w-4 h-4" />
-                        <span>
-                          {startTime.toLocaleDateString([], {
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {startTime.toLocaleTimeString([], {
-                          hour: 'numeric',
-                          minute: '2-digit'
-                        })}
-                        {endTime && (
-                          <> 
-                            → {endTime.toLocaleTimeString([], {
-                              hour: 'numeric',
-                              minute: '2-digit'
-                            })}
-                          </>
+                        {trip.isActive && (
+                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                            Active
+                          </span>
                         )}
                       </div>
-                      {duration && (
+                      
+                      <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <span>{duration}m</span>
+                          <CalendarDays className="w-4 h-4" />
+                          <span>
+                            {startTime.toLocaleDateString([], {
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
                         </div>
-                      )}
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {startTime.toLocaleTimeString([], {
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
+                          {endTime && (
+                            <> 
+                              → {endTime.toLocaleTimeString([], {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })}
+                            </>
+                          )}
+                        </div>
+                        {duration && (
+                          <div className="flex items-center gap-1">
+                            <span>{duration}m</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Car className="w-4 h-4" />
+                      <span className="font-mono">
+                        {trip.startMileage} → {trip.endMileage || '...'}
+                      </span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Car className="w-4 h-4" />
-                    <span className="font-mono">
-                      {trip.startMileage} → {trip.endMileage || '...'}
-                    </span>
-                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
