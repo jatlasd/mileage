@@ -88,7 +88,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 mt-auto mb-8">
+        <form onSubmit={handleSubmit} className="space-y-3 mt-[25%] mb-8">
           <div className="space-y-2">
             <label className="text-sm text-text/70 px-1">
               {activeTrip ? 'Enter ending mileage' : 'Enter starting mileage'}

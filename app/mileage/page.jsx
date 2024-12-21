@@ -29,14 +29,14 @@ export default function MileagePage() {
   }, []);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background text-text flex items-center justify-center">
-      Loading...
+    return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
+      <div className="animate-pulse text-lg">Loading...</div>
     </div>;
   }
 
   if (error) {
-    return <div className="min-h-screen bg-background text-text flex items-center justify-center">
-      Error loading trips: {error}
+    return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center p-4">
+      <div className="text-red-400 text-center">Error loading trips: {error}</div>
     </div>;
   }
 
@@ -60,43 +60,44 @@ export default function MileagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <div className="bg-muted/30">
-        <div className="p-4 flex items-center gap-8">
+    <div className="min-h-[100dvh] bg-background text-text flex flex-col">
+      <div className="bg-white/[0.07] border-b border-white/[0.05]">
+        <div className="p-5 space-y-4">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-sm font-medium text-muted-foreground">TODAY</h1>
-            <span className="font-mono text-2xl text-primary">{stats.today.toFixed(1)}</span>
+            <span className="text-sm font-medium text-text/60">TODAY</span>
+            <span className="font-mono text-3xl text-primary">{stats.today.toFixed(1)}</span>
+            <span className="text-sm text-text/60">miles</span>
           </div>
-          <div className="h-8 w-px bg-border" />
-          <div className="flex items-center gap-6 text-sm">
-            <div>
-              <span className="text-muted-foreground mr-2">YTD</span>
-              <span className="font-mono">{stats.ytd.toFixed(1)}</span>
+          
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="bg-white/[0.03] p-3 rounded-lg">
+              <div className="text-text/50 mb-1">YTD</div>
+              <div className="font-mono text-lg">{stats.ytd.toFixed(1)}</div>
             </div>
-            <div>
-              <span className="text-muted-foreground mr-2">{new Date().toLocaleString('default', { month: 'short' }).toUpperCase()}</span>
-              <span className="font-mono">{stats.month.toFixed(1)}</span>
+            <div className="bg-white/[0.03] p-3 rounded-lg">
+              <div className="text-text/50 mb-1">{new Date().toLocaleString('default', { month: 'short' }).toUpperCase()}</div>
+              <div className="font-mono text-lg">{stats.month.toFixed(1)}</div>
             </div>
-            <div>
-              <span className="text-muted-foreground mr-2">WEEK</span>
-              <span className="font-mono">{stats.week.toFixed(1)}</span>
+            <div className="bg-white/[0.03] p-3 rounded-lg">
+              <div className="text-text/50 mb-1">WEEK</div>
+              <div className="font-mono text-lg">{stats.week.toFixed(1)}</div>
             </div>
-            <div>
-              <span className="text-muted-foreground mr-2">AVG</span>
-              <span className="font-mono">{trips.length ? (stats.ytd / trips.length).toFixed(1) : '0.0'}</span>
+            <div className="bg-white/[0.03] p-3 rounded-lg">
+              <div className="text-text/50 mb-1">AVG</div>
+              <div className="font-mono text-lg">{trips.length ? (stats.ytd / trips.length).toFixed(1) : '0.0'}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-muted-foreground">RECENT TRIPS</h2>
-          <div className="text-sm text-muted-foreground">{trips.length} total</div>
+      <div className="flex-1 p-5 space-y-3">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-text/60">RECENT TRIPS</h2>
+          <div className="text-sm text-text/40">{trips.length} total</div>
         </div>
 
         {trips.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
+          <div className="text-center text-text/40 py-8">
             No trips recorded yet
           </div>
         ) : (
@@ -104,21 +105,20 @@ export default function MileagePage() {
             {trips.map((trip) => {
               const startTime = new Date(trip.startDatetime);
               const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
-              const duration = endTime 
-                ? Math.round((endTime - startTime) / (1000 * 60))
-                : null;
+              const duration = endTime ? Math.round((endTime - startTime) / (1000 * 60)) : null;
 
               return (
                 <div 
                   key={trip._id} 
-                  className="group relative bg-muted/50 rounded-lg p-4 hover:bg-muted/80 transition-colors"
+                  className="bg-white/[0.07] rounded-xl p-4 border border-white/[0.05]"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xl">
-                          {trip.tripMiles?.toFixed(1) || '--'} mi
+                        <span className="font-mono text-2xl">
+                          {trip.tripMiles?.toFixed(1) || '--'}
                         </span>
+                        <span className="text-text/60">mi</span>
                         {trip.isActive && (
                           <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                             Active
@@ -126,9 +126,9 @@ export default function MileagePage() {
                         )}
                       </div>
                       
-                      <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <CalendarDays className="w-4 h-4" />
+                      <div className="flex flex-wrap gap-3 mt-2 text-sm text-text/50">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarDays className="w-3.5 h-3.5" />
                           <span>
                             {startTime.toLocaleDateString([], {
                               month: 'short',
@@ -136,34 +136,33 @@ export default function MileagePage() {
                             })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {startTime.toLocaleTimeString([], {
-                            hour: 'numeric',
-                            minute: '2-digit'
-                          })}
-                          {endTime && (
-                            <> 
-                              → {endTime.toLocaleTimeString([], {
-                                hour: 'numeric',
-                                minute: '2-digit'
-                              })}
-                            </>
-                          )}
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>
+                            {startTime.toLocaleTimeString([], {
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
+                            {endTime && (
+                              <> 
+                                → {endTime.toLocaleTimeString([], {
+                                  hour: 'numeric',
+                                  minute: '2-digit'
+                                })}
+                              </>
+                            )}
+                          </span>
                         </div>
                         {duration && (
-                          <div className="flex items-center gap-1">
-                            <span>{duration}m</span>
+                          <div className="text-text/40">
+                            {duration}m
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Car className="w-4 h-4" />
-                      <span className="font-mono">
-                        {trip.startMileage} → {trip.endMileage || '...'}
-                      </span>
+                    <div className="text-sm text-text/50 font-mono">
+                      {trip.startMileage} → {trip.endMileage || '...'}
                     </div>
                   </div>
                 </div>
