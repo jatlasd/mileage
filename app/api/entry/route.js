@@ -3,17 +3,32 @@ import Trip from '@/models/entry';
 
 export const GET = async () => {
   try {
+    console.log('Connecting to database...');
     await dbConnect();
-    const trips = await Trip.find({}).sort({ startDatetime: -1 });
+    console.log('Connected successfully');
+    
+    console.log('Fetching trips...');
+    const trips = await Trip.find({}).sort({ startDatetime: -1 }).lean();
+    console.log(`Found ${trips.length} trips`);
+    
     return new Response(JSON.stringify(trips), { 
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, max-age=0',
       },
     });
   } catch (error) {
-    console.error('Database error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch trips' }), { 
+    console.error('Database error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    
+    return new Response(JSON.stringify({ 
+      error: 'Failed to fetch trips',
+      details: error.message 
+    }), { 
       status: 500,
       headers: {
         'Content-Type': 'application/json',

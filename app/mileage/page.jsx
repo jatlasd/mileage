@@ -12,7 +12,10 @@ export default function MileagePage() {
     async function fetchTrips() {
       try {
         const res = await fetch('/api/entry');
-        if (!res.ok) throw new Error('Failed to fetch');
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.details || 'Failed to fetch trips');
+        }
         const data = await res.json();
         setTrips(data);
       } catch (err) {
