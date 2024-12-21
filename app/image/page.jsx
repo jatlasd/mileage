@@ -17,14 +17,14 @@ export default function ImagePage() {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
 
-        const targetWidth = 2400
+        const targetWidth = 3000
         const scaleFactor = targetWidth / img.width
         canvas.width = targetWidth
         canvas.height = img.height * scaleFactor
 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-        const cropHeight = canvas.height * 0.4
+        const cropHeight = canvas.height * 0.35
         const cropY = (canvas.height - cropHeight) / 2
         const imageData = ctx.getImageData(0, cropY, canvas.width, cropHeight)
         const data = imageData.data
@@ -34,33 +34,36 @@ export default function ImagePage() {
           const g = data[i + 1]
           const b = data[i + 2]
           
-          const brightness = (r + g + b) / 3
-          const isBlueish = b > Math.max(r, g) && b > 100
-          
-          if (isBlueish && brightness > 50) {
-            data[i] = data[i + 1] = data[i + 2] = 255
+          if (b > 70 && b > (r * 1.1) && b > (g * 1.1)) {
+            const boost = 1.5
+            data[i] = Math.min(255, r * boost)
+            data[i + 1] = Math.min(255, g * boost)
+            data[i + 2] = Math.min(255, b * boost)
           } else {
-            data[i] = data[i + 1] = data[i + 2] = 0
+            const darken = 0.1
+            data[i] = r * darken
+            data[i + 1] = g * darken
+            data[i + 2] = b * darken
           }
+          data[i + 3] = 255
         }
 
         const processedCanvas = document.createElement('canvas')
         processedCanvas.width = canvas.width
         processedCanvas.height = cropHeight
         const processedCtx = processedCanvas.getContext('2d')
-
         processedCtx.putImageData(imageData, 0, 0)
 
         const finalCanvas = document.createElement('canvas')
-        finalCanvas.width = processedCanvas.width * 1.5
-        finalCanvas.height = processedCanvas.height * 1.5
+        finalCanvas.width = processedCanvas.width
+        finalCanvas.height = processedCanvas.height
         const finalCtx = finalCanvas.getContext('2d')
         
         finalCtx.imageSmoothingEnabled = false
         finalCtx.drawImage(processedCanvas, 0, 0, finalCanvas.width, finalCanvas.height)
 
         setProcessedPreview(finalCanvas.toDataURL())
-        finalCanvas.toBlob(resolve, 'image/jpeg', 1.0)
+        finalCanvas.toBlob(resolve, 'image/png', 1.0)
       }
       img.src = URL.createObjectURL(file)
     })
@@ -83,30 +86,36 @@ export default function ImagePage() {
 
     try {
       const optimizedBlob = await preprocessImage(file)
-      setDebugText('Created worker...')
-      
       const worker = await createWorker()
       
-      setDebugText('Running OCR...')
-      const result = await worker.recognize(optimizedBlob, {
+      await worker.setParameters({
         tessedit_char_whitelist: '0123456789',
         tessedit_pageseg_mode: '7',
         tessjs_create_pdf: '0',
         tessjs_create_hocr: '0',
-        preserve_interword_spaces: '0'
+        preserve_interword_spaces: '0',
+        user_defined_dpi: '300',
+        tessedit_ocr_engine_mode: '1',
+        tessjs_create_tsv: '0',
+        tessjs_create_box: '0',
+        tessjs_create_unlv: '0'
       })
-
+      
+      const result = await worker.recognize(optimizedBlob)
       const text = result.data.text.trim()
-      setDebugText('Raw text: ' + text)
       
-      // Find the longest sequence of numbers
-      const numbers = text.split(/\s+/)
-      const longest = numbers.reduce((a, b) => 
-        (a.replace(/\D/g, '').length >= b.replace(/\D/g, '').length) ? a : b
-      )
-      const cleanNumber = longest.replace(/\D/g, '')
-      
-      console.log('Extracted mileage:', cleanNumber)
+      const numbers = text.match(/\d+/g)
+      if (numbers && numbers.length > 0) {
+        const validNumbers = numbers.filter(n => n.length >= 5 && n.length <= 7)
+        if (validNumbers.length > 0) {
+          const mileage = validNumbers[0]
+          setDebugText(`Found mileage: ${mileage}`)
+        } else {
+          setDebugText('No valid mileage found')
+        }
+      } else {
+        setDebugText('No numbers found in image')
+      }
 
       await worker.terminate()
     } catch (error) {
