@@ -58,43 +58,59 @@ export default function HomePage() {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background text-text flex items-center justify-center">
-      Loading...
+    return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
+      <div className="animate-pulse text-lg">Loading...</div>
     </div>;
   }
 
   return (
-    <div className="min-h-screen bg-background text-text flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-8">Delivery Mileage Tracker</h1>
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl mb-2">
-          {activeTrip ? 'End Trip' : 'Start New Trip'}
-        </h2>
-        {activeTrip && (
-          <div className="text-lg opacity-80 mb-4">
-            <p>Trip started at {activeTrip.startMileage} miles</p>
-            <p className="text-sm mt-2">
-              Started: {new Date(activeTrip.startDatetime).toLocaleTimeString()}
-              <br />
-              Duration: {formatDuration(activeTrip.startDatetime, currentTime)}
-            </p>
+    <div className="min-h-[100dvh] bg-background text-text flex flex-col">
+      <div className="flex-1 flex flex-col p-5 pt-6">
+        <h1 className="text-2xl font-bold mb-6 text-center text-primary">
+          Delivery Mileage Tracker
+        </h1>
+        
+        <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
+          <h2 className="text-base font-medium mb-3 text-text/80">
+            {activeTrip ? 'Current Trip' : 'Start New Trip'}
+          </h2>
+          {activeTrip && (
+            <div className="space-y-3">
+              <div className="flex items-baseline gap-2">
+                <span className="text-primary/90 text-sm">Starting Mileage:</span>
+                <span className="font-mono text-2xl">{activeTrip.startMileage}</span>
+              </div>
+              <div className="text-sm text-text/60 space-y-0.5">
+                <p>Started: {new Date(activeTrip.startDatetime).toLocaleTimeString()}</p>
+                <p>Duration: {formatDuration(activeTrip.startDatetime, currentTime)}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3 mt-auto mb-8">
+          <div className="space-y-2">
+            <label className="text-sm text-text/70 px-1">
+              {activeTrip ? 'Enter ending mileage' : 'Enter starting mileage'}
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+              className="w-full h-16 px-4 border border-white/10 rounded-xl bg-white/[0.07] text-2xl font-mono placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/[0.09] transition-all"
+              required
+            />
           </div>
-        )}
+          <button 
+            type="submit" 
+            className="w-full h-16 bg-primary text-white text-lg font-medium rounded-xl active:scale-[0.98] transition-transform shadow-lg shadow-primary/20"
+          >
+            {activeTrip ? 'End Trip' : 'Start Trip'}
+          </button>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} className="flex flex-col items-center w-full max-w-xs">
-        <input
-          type="number"
-          step="0.1"
-          value={mileage}
-          onChange={(e) => setMileage(e.target.value)}
-          placeholder={activeTrip ? "Enter ending mileage" : "Enter starting mileage"}
-          className="p-2 mb-4 border rounded bg-background text-text w-full"
-          required
-        />
-        <button type="submit" className="bg-primary text-text px-6 py-2 rounded w-full">
-          {activeTrip ? 'End Trip' : 'Start Trip'}
-        </button>
-      </form>
     </div>
   );
 }
