@@ -1,13 +1,40 @@
-import { getAllTrips } from '@/models/entry';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { CalendarDays, Clock, Car } from 'lucide-react';
 
-export default async function MileagePage() {
-  let trips = [];
-  
-  try {
-    trips = await getAllTrips();
-  } catch (error) {
-    console.error('Failed to fetch trips:', error);
+export default function MileagePage() {
+  const [trips, setTrips] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchTrips() {
+      try {
+        const res = await fetch('/api/entry');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setTrips(data);
+      } catch (err) {
+        console.error('Error fetching trips:', err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchTrips();
+  }, []);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-background text-text flex items-center justify-center">
+      Loading...
+    </div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-background text-text flex items-center justify-center">
+      Error loading trips: {error}
+    </div>;
   }
 
   const getMileageForDateRange = (startDate) => {
