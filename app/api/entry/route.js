@@ -1,10 +1,10 @@
-import dbConnect from '@/lib/mongodb';
+import { connectToDb } from '@/lib/mongodb';
 import Trip from '@/models/entry';
 
 export const GET = async () => {
   try {
     console.log('Connecting to database...');
-    await dbConnect();
+    await connectToDb();
     console.log('Connected successfully');
     
     console.log('Fetching trips...');
@@ -40,7 +40,7 @@ export const GET = async () => {
 export const POST = async (request) => {
   try {
     const body = await request.json();
-    await dbConnect();
+    await connectToDb();
 
     const activeTrip = await Trip.findOne({ isActive: true });
 
