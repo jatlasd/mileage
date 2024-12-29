@@ -106,6 +106,8 @@ export default function MileagePage() {
               const startTime = new Date(trip.startDatetime);
               const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
               const duration = endTime ? Math.round((endTime - startTime) / (1000 * 60)) : null;
+              const totalBreakDuration = trip.totalBreakDuration || 0;
+              const netDuration = duration ? duration - Math.round(totalBreakDuration / 60) : null;
 
               return (
                 <div 
@@ -155,7 +157,7 @@ export default function MileagePage() {
                         </div>
                         {duration && (
                           <div className="text-text/40">
-                            {duration}m
+                            {netDuration}m (breaks: {Math.round(totalBreakDuration / 60)}m)
                           </div>
                         )}
                       </div>
@@ -165,6 +167,41 @@ export default function MileagePage() {
                       {trip.startMileage} → {trip.endMileage || '...'}
                     </div>
                   </div>
+
+                  {trip.breaks && trip.breaks.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                      <div className="text-xs text-text/40 mb-2">Breaks:</div>
+                      <div className="space-y-1">
+                        {trip.breaks.map((breakPeriod, index) => {
+                          const breakStart = new Date(breakPeriod.startTime);
+                          const breakEnd = breakPeriod.endTime ? new Date(breakPeriod.endTime) : null;
+                          return (
+                            <div key={index} className="text-xs text-text/60 flex items-center gap-2">
+                              <span>
+                                {breakStart.toLocaleTimeString([], {
+                                  hour: 'numeric',
+                                  minute: '2-digit'
+                                })}
+                                {breakEnd && (
+                                  <> 
+                                    → {breakEnd.toLocaleTimeString([], {
+                                      hour: 'numeric',
+                                      minute: '2-digit'
+                                    })}
+                                  </>
+                                )}
+                              </span>
+                              {breakPeriod.duration && (
+                                <span className="text-text/40">
+                                  ({Math.round(breakPeriod.duration / 60)}m)
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

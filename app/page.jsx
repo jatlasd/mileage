@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
+import { Pause, Play } from 'lucide-react';
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
   const [activeTrip, setActiveTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBreakLoading, setIsBreakLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -57,11 +59,43 @@ export default function HomePage() {
     }
   };
 
+  const handleBreak = async () => {
+    if (!activeTrip) return;
+    
+    const activeBreak = activeTrip.breaks?.find(b => !b.endTime);
+    const action = activeBreak ? 'end' : 'start';
+    
+    setIsBreakLoading(true);
+    try {
+      const res = await fetch('/api/break', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId: activeTrip._id, action })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to process break');
+      }
+
+      const updatedTrip = await res.json();
+      setActiveTrip(updatedTrip);
+    } catch (err) {
+      console.error(err);
+      alert('Error processing break');
+    } finally {
+      setIsBreakLoading(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
       <div className="animate-pulse text-lg">Loading...</div>
     </div>;
   }
+
+  const activeBreak = activeTrip?.breaks?.find(b => !b.endTime);
+  const totalBreakDuration = activeTrip?.totalBreakDuration || 0;
 
   return (
     <div className="min-h-[100dvh] bg-background text-text flex flex-col">
@@ -75,15 +109,35 @@ export default function HomePage() {
             {activeTrip ? 'Current Trip' : 'Start New Trip'}
           </h2>
           {activeTrip && (
-            <div className="space-y-3">
+            <div className={`space-y-3 ${activeBreak ? 'p-3 bg-red-500/10 rounded-lg border border-red-500/20' : ''}`}>
               <div className="flex items-baseline gap-2">
                 <span className="text-primary/90 text-sm">Starting Mileage:</span>
                 <span className="font-mono text-2xl">{activeTrip.startMileage}</span>
               </div>
               <div className="text-sm text-text/60 space-y-0.5">
                 <p>Started: {new Date(activeTrip.startDatetime).toLocaleTimeString()}</p>
-                <p>Duration: {formatDuration(activeTrip.startDatetime, currentTime)}</p>
+
               </div>
+              <button
+                onClick={handleBreak}
+                disabled={isBreakLoading}
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50 mt-2
+                  ${activeBreak 
+                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
+                    : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}
+              >
+                {activeBreak ? (
+                  <>
+                    <Play className="w-4 h-4" />
+                    Resume Trip
+                  </>
+                ) : (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    Take Break
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>
