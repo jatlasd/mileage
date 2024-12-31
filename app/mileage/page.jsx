@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarDays, Clock, Car } from 'lucide-react';
+import { CalendarDays, Clock, Car, Edit2, X, Check } from 'lucide-react';
 
 export default function MileagePage() {
   const [trips, setTrips] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingTrip, setEditingTrip] = useState(null);
+  const [editForm, setEditForm] = useState({ startMileage: '', endMileage: '' });
 
   useEffect(() => {
     async function fetchTrips() {
@@ -44,6 +46,47 @@ export default function MileagePage() {
     return trips
       .filter(trip => new Date(trip.startDatetime) >= startDate)
       .reduce((acc, trip) => acc + (trip.tripMiles || 0), 0);
+  };
+
+  const handleEdit = (trip) => {
+    setEditingTrip(trip._id);
+    setEditForm({
+      startMileage: trip.startMileage,
+      endMileage: trip.endMileage || ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTrip(null);
+    setEditForm({ startMileage: '', endMileage: '' });
+  };
+
+  const handleSaveEdit = async (tripId) => {
+    try {
+      const res = await fetch(`/api/entry/${tripId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          startMileage: Number(editForm.startMileage),
+          endMileage: Number(editForm.endMileage)
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update trip');
+      }
+
+      const updatedTrip = await res.json();
+      setTrips(trips.map(trip => 
+        trip._id === tripId ? updatedTrip : trip
+      ));
+      setEditingTrip(null);
+      setEditForm({ startMileage: '', endMileage: '' });
+    } catch (err) {
+      console.error('Error updating trip:', err);
+      setError(err.message);
+    }
   };
 
   const now = new Date();
@@ -196,8 +239,50 @@ export default function MileagePage() {
                             </div>
                           </div>
 
-                          <div className="text-sm text-text/50 font-mono">
-                            {trip.startMileage} → {trip.endMileage || '...'}
+                          <div className="flex items-center gap-2">
+                            {editingTrip === trip._id ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  value={editForm.startMileage}
+                                  onChange={(e) => setEditForm({ ...editForm, startMileage: e.target.value })}
+                                  className="w-20 px-2 py-1 text-sm bg-white/10 rounded border border-white/20 font-mono"
+                                  placeholder="Start"
+                                />
+                                <span className="text-text/50">→</span>
+                                <input
+                                  type="number"
+                                  value={editForm.endMileage}
+                                  onChange={(e) => setEditForm({ ...editForm, endMileage: e.target.value })}
+                                  className="w-20 px-2 py-1 text-sm bg-white/10 rounded border border-white/20 font-mono"
+                                  placeholder="End"
+                                />
+                                <button
+                                  onClick={() => handleSaveEdit(trip._id)}
+                                  className="p-1 hover:bg-white/10 rounded"
+                                >
+                                  <Check className="w-4 h-4 text-green-400" />
+                                </button>
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="p-1 hover:bg-white/10 rounded"
+                                >
+                                  <X className="w-4 h-4 text-red-400" />
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="text-sm text-text/50 font-mono">
+                                  {trip.startMileage} → {trip.endMileage || '...'}
+                                </div>
+                                <button
+                                  onClick={() => handleEdit(trip)}
+                                  className="p-1 hover:bg-white/10 rounded"
+                                >
+                                  <Edit2 className="w-4 h-4 text-text/40" />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
 
