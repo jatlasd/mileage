@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarDays, Clock, Car, Edit2, X, Check } from 'lucide-react';
+import { CalendarDays, Clock, Car, Edit2, X, Check, Download } from 'lucide-react';
 
 export default function MileagePage() {
   const [trips, setTrips] = useState([]);
@@ -89,6 +89,25 @@ export default function MileagePage() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/export?t=${timestamp}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trip_data.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      setError('Failed to export CSV');
+    }
+  };
+
   const now = new Date();
   const startOfDay = new Date(now.setHours(0, 0, 0, 0));
   const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
@@ -171,7 +190,16 @@ export default function MileagePage() {
       <div className="flex-1 p-5 space-y-3">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-text/60">RECENT TRIPS</h2>
-          <div className="text-sm text-text/40">{trips.length} total</div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white/[0.07] hover:bg-white/[0.1] rounded-lg transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <div className="text-sm text-text/40">{trips.length} total</div>
+          </div>
         </div>
 
         {trips.length === 0 ? (
