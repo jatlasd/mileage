@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, BarChart2 } from 'lucide-react';
+import { Home, BarChart2, Calendar } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -18,6 +18,13 @@ export default function Navbar() {
         >
           <BarChart2 className="h-4 w-4" />
           Stats
+        </Link>
+        <Link 
+          href="/mileage/calendar" 
+          className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+        >
+          <Calendar className="h-4 w-4" />
+          Calendar
         </Link>
       </div>
     </div>

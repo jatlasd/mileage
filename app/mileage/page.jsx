@@ -59,6 +59,41 @@ export default function MileagePage() {
     today: getMileageForDateRange(startOfDay)
   };
 
+  const groupTripsByDay = (trips) => {
+    const grouped = {};
+    trips.forEach(trip => {
+      const date = new Date(trip.startDatetime);
+      const dateKey = date.toISOString().split('T')[0];
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(trip);
+    });
+    return Object.entries(grouped).sort((a, b) => b[0].localeCompare(a[0]));
+  };
+
+  const formatDayHeader = (dateStr) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (dateStr === today.toISOString().split('T')[0]) {
+      return 'Today';
+    } else if (dateStr === yesterday.toISOString().split('T')[0]) {
+      return 'Yesterday';
+    }
+    return date.toLocaleDateString([], {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getDayTotal = (trips) => {
+    return trips.reduce((acc, trip) => acc + (trip.tripMiles || 0), 0);
+  };
+
   return (
     <div className="min-h-[100dvh] bg-background text-text flex flex-col">
       <div className="bg-white/[0.07] border-b border-white/[0.05]">
@@ -101,110 +136,111 @@ export default function MileagePage() {
             No trips recorded yet
           </div>
         ) : (
-          <div className="space-y-3">
-            {trips.map((trip) => {
-              const startTime = new Date(trip.startDatetime);
-              const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
-              const duration = endTime ? Math.round((endTime - startTime) / (1000 * 60)) : null;
-              const totalBreakDuration = trip.totalBreakDuration || 0;
-              const netDuration = duration ? duration - Math.round(totalBreakDuration / 60) : null;
+          <div className="space-y-6">
+            {groupTripsByDay(trips).map(([dateKey, dayTrips]) => (
+              <div key={dateKey} className="space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-sm font-medium text-text/80">{formatDayHeader(dateKey)}</h3>
+                  <span className="text-xs text-text/40 font-mono">{getDayTotal(dayTrips).toFixed(1)} mi</span>
+                </div>
+                <div className="space-y-3">
+                  {dayTrips.map((trip) => {
+                    const startTime = new Date(trip.startDatetime);
+                    const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
+                    const duration = endTime ? Math.round((endTime - startTime) / (1000 * 60)) : null;
+                    const totalBreakDuration = trip.totalBreakDuration || 0;
+                    const netDuration = duration ? duration - Math.round(totalBreakDuration / 60) : null;
 
-              return (
-                <div 
-                  key={trip._id} 
-                  className="bg-white/[0.07] rounded-xl p-4 border border-white/[0.05]"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-2xl">
-                          {trip.tripMiles?.toFixed(1) || '--'}
-                        </span>
-                        <span className="text-text/60">mi</span>
-                        {trip.isActive && (
-                          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-3 mt-2 text-sm text-text/50">
-                        <div className="flex items-center gap-1.5">
-                          <CalendarDays className="w-3.5 h-3.5" />
-                          <span>
-                            {startTime.toLocaleDateString([], {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>
-                            {startTime.toLocaleTimeString([], {
-                              hour: 'numeric',
-                              minute: '2-digit'
-                            })}
-                            {endTime && (
-                              <> 
-                                → {endTime.toLocaleTimeString([], {
-                                  hour: 'numeric',
-                                  minute: '2-digit'
-                                })}
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        {duration && (
-                          <div className="text-text/40">
-                            {netDuration}m (breaks: {Math.round(totalBreakDuration / 60)}m)
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-text/50 font-mono">
-                      {trip.startMileage} → {trip.endMileage || '...'}
-                    </div>
-                  </div>
-
-                  {trip.breaks && trip.breaks.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-white/[0.05]">
-                      <div className="text-xs text-text/40 mb-2">Breaks:</div>
-                      <div className="space-y-1">
-                        {trip.breaks.map((breakPeriod, index) => {
-                          const breakStart = new Date(breakPeriod.startTime);
-                          const breakEnd = breakPeriod.endTime ? new Date(breakPeriod.endTime) : null;
-                          return (
-                            <div key={index} className="text-xs text-text/60 flex items-center gap-2">
-                              <span>
-                                {breakStart.toLocaleTimeString([], {
-                                  hour: 'numeric',
-                                  minute: '2-digit'
-                                })}
-                                {breakEnd && (
-                                  <> 
-                                    → {breakEnd.toLocaleTimeString([], {
-                                      hour: 'numeric',
-                                      minute: '2-digit'
-                                    })}
-                                  </>
-                                )}
+                    return (
+                      <div 
+                        key={trip._id} 
+                        className="bg-white/[0.07] rounded-xl p-4 border border-white/[0.05]"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-2xl">
+                                {trip.tripMiles?.toFixed(1) || '--'}
                               </span>
-                              {breakPeriod.duration && (
-                                <span className="text-text/40">
-                                  ({Math.round(breakPeriod.duration / 60)}m)
+                              <span className="text-text/60">mi</span>
+                              {trip.isActive && (
+                                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                                  Active
                                 </span>
                               )}
                             </div>
-                          );
-                        })}
+                            
+                            <div className="flex flex-wrap gap-3 mt-2 text-sm text-text/50">
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>
+                                  {startTime.toLocaleTimeString([], {
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                  })}
+                                  {endTime && (
+                                    <> 
+                                      → {endTime.toLocaleTimeString([], {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                      })}
+                                    </>
+                                  )}
+                                </span>
+                              </div>
+                              {duration && (
+                                <div className="text-text/40">
+                                  {netDuration}m (breaks: {Math.round(totalBreakDuration / 60)}m)
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-sm text-text/50 font-mono">
+                            {trip.startMileage} → {trip.endMileage || '...'}
+                          </div>
+                        </div>
+
+                        {trip.breaks && trip.breaks.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                            <div className="text-xs text-text/40 mb-2">Breaks:</div>
+                            <div className="space-y-1">
+                              {trip.breaks.map((breakPeriod, index) => {
+                                const breakStart = new Date(breakPeriod.startTime);
+                                const breakEnd = breakPeriod.endTime ? new Date(breakPeriod.endTime) : null;
+                                return (
+                                  <div key={index} className="text-xs text-text/60 flex items-center gap-2">
+                                    <span>
+                                      {breakStart.toLocaleTimeString([], {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                      })}
+                                      {breakEnd && (
+                                        <> 
+                                          → {breakEnd.toLocaleTimeString([], {
+                                            hour: 'numeric',
+                                            minute: '2-digit'
+                                          })}
+                                        </>
+                                      )}
+                                    </span>
+                                    {breakPeriod.duration && (
+                                      <span className="text-text/40">
+                                        ({Math.round(breakPeriod.duration / 60)}m)
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>
