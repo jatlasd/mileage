@@ -6,6 +6,11 @@ const BreakSchema = new mongoose.Schema({
   duration: { type: Number }
 });
 
+const OrderSchema = new mongoose.Schema({
+  time: { type: String },
+  hour: { type: String }
+});
+
 const TripSchema = new mongoose.Schema({
   startDatetime: { type: Date, default: Date.now },
   endDatetime: { type: Date },
@@ -14,7 +19,8 @@ const TripSchema = new mongoose.Schema({
   tripMiles: { type: Number },
   isActive: { type: Boolean, default: true },
   breaks: [BreakSchema],
-  totalBreakDuration: { type: Number, default: 1 }
+  orders: [OrderSchema],
+  totalBreakDuration: { type: Number, default: 0 }
 });
 
 export const getAllTrips = async () => {

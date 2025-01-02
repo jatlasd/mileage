@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, Plus } from 'lucide-react';
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
   const [activeTrip, setActiveTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBreakLoading, setIsBreakLoading] = useState(false);
+  const [isOrderLoading, setIsOrderLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -88,6 +89,31 @@ export default function HomePage() {
     }
   };
 
+  const handleAddOrder = async () => {
+    if (!activeTrip) return;
+    
+    setIsOrderLoading(true);
+    try {
+      const res = await fetch(`/api/entry/${activeTrip._id}/order`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to add order');
+      }
+
+      const updatedTrip = await res.json();
+      setActiveTrip(updatedTrip);
+    } catch (err) {
+      console.error(err);
+      alert('Error adding order');
+    } finally {
+      setIsOrderLoading(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
       <div className="animate-pulse text-lg">Loading...</div>
@@ -116,28 +142,38 @@ export default function HomePage() {
               </div>
               <div className="text-sm text-text/60 space-y-0.5">
                 <p>Started: {new Date(activeTrip.startDatetime).toLocaleTimeString()}</p>
-
+                <p>Orders: <span className="text-green-400 font-medium">{activeTrip.orders?.length || 0}</span></p>
               </div>
-              <button
-                onClick={handleBreak}
-                disabled={isBreakLoading}
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50 mt-2
-                  ${activeBreak 
-                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
-                    : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}
-              >
-                {activeBreak ? (
-                  <>
-                    <Play className="w-4 h-4" />
-                    Resume Trip
-                  </>
-                ) : (
-                  <>
-                    <Pause className="w-4 h-4" />
-                    Take Break
-                  </>
-                )}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBreak}
+                  disabled={isBreakLoading}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50
+                    ${activeBreak 
+                      ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
+                      : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}
+                >
+                  {activeBreak ? (
+                    <>
+                      <Play className="w-4 h-4" />
+                      Resume Trip
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      Take Break
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleAddOrder}
+                  disabled={isOrderLoading || activeBreak}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50 bg-green-500/20 hover:bg-green-500/30 text-green-400"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Order
+                </button>
+              </div>
             </div>
           )}
         </div>
