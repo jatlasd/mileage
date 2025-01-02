@@ -13,7 +13,7 @@ export async function PATCH(request, { params }) {
     const minutes = now.getMinutes();
     const time = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
-      .padStart(2, "0")}`;
+      .padStart(2, "1")}`;
 
     const trip = await Trip.findByIdAndUpdate(
       id,
