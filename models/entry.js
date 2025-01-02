@@ -6,14 +6,19 @@ const BreakSchema = new mongoose.Schema({
   duration: { type: Number }
 });
 
+const OrderSchema = new mongoose.Schema({
+  time: { type: Date, default: Date.now }
+})
+
 const TripSchema = new mongoose.Schema({
   startDatetime: { type: Date, default: Date.now },
   endDatetime: { type: Date },
   startMileage: { type: Number, required: true },
   endMileage: { type: Number },
   tripMiles: { type: Number },
-  isActive: { type: Boolean, default: tru },
+  isActive: { type: Boolean, default: true },
   breaks: [BreakSchema],
+  orders: [OrderSchema],
   totalBreakDuration: { type: Number, default: 0 }
 });
 
@@ -59,5 +64,7 @@ export const endBreak = async (tripId) => {
   }
   return trip;
 };
+
+
 
 export default mongoose.models.Trip || mongoose.model('Trip', TripSchema);
