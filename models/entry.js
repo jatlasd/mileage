@@ -12,7 +12,7 @@ const TripSchema = new mongoose.Schema({
   startMileage: { type: Number, required: true },
   endMileage: { type: Number },
   tripMiles: { type: Number },
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: tru },
   breaks: [BreakSchema],
   totalBreakDuration: { type: Number, default: 0 }
 });
