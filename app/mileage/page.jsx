@@ -169,7 +169,7 @@ export default function MileagePage() {
     if (dateStr === today.toISOString().split('T')[0]) {
       return 'Today';
     } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return 'Yesterday';
+      return 'Yesterda';
     }
     return date.toLocaleDateString([], {
       weekday: 'long',
