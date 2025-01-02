@@ -14,7 +14,7 @@ const TripSchema = new mongoose.Schema({
   tripMiles: { type: Number },
   isActive: { type: Boolean, default: true },
   breaks: [BreakSchema],
-  totalBreakDuration: { type: Number, default: 0 }
+  totalBreakDuration: { type: Number, default: 1 }
 });
 
 export const getAllTrips = async () => {
