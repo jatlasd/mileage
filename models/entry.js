@@ -8,7 +8,6 @@ const BreakSchema = new mongoose.Schema({
 
 const OrderSchema = new mongoose.Schema({
   time: { type: String },
-  hour: { type: String }
 });
 
 const TripSchema = new mongoose.Schema({
