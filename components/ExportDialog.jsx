@@ -59,14 +59,18 @@ export default function ExportDialog({ onExport }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-2 bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133] transition-colors"
+        >
           <Download className="h-4 w-4" />
           Export
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[300px]">
+      <DialogContent className="max-w-[300px] bg-[#1a1b26] border border-white/[0.1] text-white/80">
         <DialogHeader>
-          <DialogTitle>Export Mileage Data</DialogTitle>
+          <DialogTitle className="text-white/90">Export Mileage Data</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-4">
           <div className="flex gap-2">
@@ -75,7 +79,7 @@ export default function ExportDialog({ onExport }) {
               className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
                 selectedYear === currentYear
                   ? 'bg-primary/20 text-primary border border-primary/20'
-                  : 'bg-white/[0.07] border border-white/[0.05] hover:bg-white/[0.1]'
+                  : 'bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]'
               }`}
             >
               {currentYear}
@@ -85,15 +89,14 @@ export default function ExportDialog({ onExport }) {
               className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
                 selectedYear === currentYear - 1
                   ? 'bg-primary/20 text-primary border border-primary/20'
-                  : 'bg-white/[0.07] border border-white/[0.05] hover:bg-white/[0.1]'
+                  : 'bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]'
               }`}
             >
               {currentYear - 1}
             </button>
             <button
               onClick={handleLast30Days}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors
-                bg-white/[0.07] border border-white/[0.05] hover:bg-white/[0.1]`}
+              className="flex-1 px-3 py-2 rounded-lg text-sm transition-colors bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]"
             >
               Last 30
             </button>
@@ -104,17 +107,18 @@ export default function ExportDialog({ onExport }) {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-between text-left font-normal"
+                  className="w-full justify-between text-left font-normal bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]"
                 >
                   <span>{selectedMonth !== null ? months[selectedMonth] : 'Select Month'}</span>
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[240px]">
+              <DropdownMenuContent className="w-[240px] bg-[#1a1b26] border border-white/[0.1] text-white/80">
                 {getAvailableMonths().map((month, index) => (
                   <DropdownMenuItem
                     key={index}
                     onClick={() => handleMonthSelect(index)}
+                    className="hover:bg-[#1f2133] focus:bg-[#1f2133] focus:text-white/80"
                   >
                     {month}
                   </DropdownMenuItem>
@@ -125,7 +129,7 @@ export default function ExportDialog({ onExport }) {
 
           {selectedYear && selectedMonth !== null && (
             <Button 
-              className="w-full" 
+              className="w-full bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]" 
               onClick={handleDownload}
             >
               Download CSV
