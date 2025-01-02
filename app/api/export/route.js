@@ -2,10 +2,23 @@ import { NextResponse } from 'next/server';
 import connectToDb from '@/lib/mongodb';
 import Trip from '@/models/entry';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
     await connectToDb();
-    const trips = await Trip.find({}).sort({ startDatetime: -1 });
+    
+    const query = {};
+    if (startDate && endDate) {
+      query.startDatetime = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const trips = await Trip.find(query).sort({ startDatetime: -1 });
 
     const headers = [
       'Date',
@@ -19,11 +32,9 @@ export async function GET() {
       
       const formatDate = (date) => {
         if (!date) return '';
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const month = months[date.getMonth()];
-        const day = date.getDate();
-        const year = date.getFullYear();
-        return `${month} ${day}, ${year}`;
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${month}/${day}`;
       };
       
       const escapeField = (field) => {
