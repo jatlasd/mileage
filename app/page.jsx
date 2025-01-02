@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, Package, Plus } from 'lucide-react';
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
   const [activeTrip, setActiveTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBreakLoading, setIsBreakLoading] = useState(false);
+  const [isOrderLoading, setIsOrderLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -88,6 +89,41 @@ export default function HomePage() {
     }
   };
 
+  const handleLogOrder = async () => {
+    if (!activeTrip) return;
+    
+    setIsOrderLoading(true);
+    try {
+      const now = new Date();
+      const hour = new Date(now.setMinutes(0, 0, 0));
+      
+      const existingOrder = activeTrip.hourlyOrders?.find(
+        order => new Date(order.hour).getTime() === hour.getTime()
+      );
+      
+      const res = await fetch(`/api/entry/${activeTrip._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderCount: (existingOrder?.orderCount || 0) + 1,
+          hour: hour
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to log order');
+      }
+
+      const updatedTrip = await res.json();
+      setActiveTrip(updatedTrip);
+    } catch (err) {
+      console.error(err);
+      alert('Error logging order');
+    } finally {
+      setIsOrderLoading(false);
+    }
+  };
+
   if (isLoading) {
     return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
       <div className="animate-pulse text-lg">Loading...</div>
@@ -116,28 +152,49 @@ export default function HomePage() {
               </div>
               <div className="text-sm text-text/60 space-y-0.5">
                 <p>Started: {new Date(activeTrip.startDatetime).toLocaleTimeString()}</p>
-
-              </div>
-              <button
-                onClick={handleBreak}
-                disabled={isBreakLoading}
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50 mt-2
-                  ${activeBreak 
-                    ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
-                    : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}
-              >
-                {activeBreak ? (
-                  <>
-                    <Play className="w-4 h-4" />
-                    Resume Trip
-                  </>
-                ) : (
-                  <>
-                    <Pause className="w-4 h-4" />
-                    Take Break
-                  </>
+                {activeTrip.hourlyOrders && (
+                  <p className="flex items-center gap-1">
+                    <Package className="w-3.5 h-3.5" />
+                    Orders this hour: {
+                      activeTrip.hourlyOrders.find(
+                        order => new Date(order.hour).getTime() === new Date().setMinutes(0, 0, 0)
+                      )?.orderCount || 0
+                    }
+                  </p>
                 )}
-              </button>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleBreak}
+                  disabled={isBreakLoading}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50
+                    ${activeBreak 
+                      ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400' 
+                      : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}
+                >
+                  {activeBreak ? (
+                    <>
+                      <Play className="w-4 h-4" />
+                      Resume Trip
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      Take Break
+                    </>
+                  )}
+                </button>
+                {!activeBreak && (
+                  <button
+                    onClick={handleLogOrder}
+                    disabled={isOrderLoading}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 text-sm rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-colors disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Log Order
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

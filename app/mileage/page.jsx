@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CalendarDays, Clock, Car, Edit2, X, Check } from 'lucide-react';
+import { CalendarDays, Clock, Car, Edit2, X, Check, Package } from 'lucide-react';
 import {
   Pagination,
   PaginationContent,
@@ -19,6 +19,8 @@ export default function MileagePage() {
   const [error, setError] = useState(null);
   const [editingTrip, setEditingTrip] = useState(null);
   const [editForm, setEditForm] = useState({ startMileage: '', endMileage: '' });
+  const [editingOrders, setEditingOrders] = useState(null);
+  const [orderCount, setOrderCount] = useState('');
   const [filterPeriod, setFilterPeriod] = useState('all');
   const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString());
   const [currentPage, setCurrentPage] = useState(1);
@@ -169,7 +171,7 @@ export default function MileagePage() {
     if (dateStr === today.toISOString().split('T')[0]) {
       return 'Today';
     } else if (dateStr === yesterday.toISOString().split('T')[0]) {
-      return 'Yesterda';
+      return 'Yesterday';
     }
     return date.toLocaleDateString([], {
       weekday: 'long',
@@ -229,6 +231,59 @@ export default function MileagePage() {
       totalPages,
       totalItems: groupedTrips.length
     };
+  };
+
+  const handleOrderEdit = (trip, hour) => {
+    const existingOrder = trip.hourlyOrders?.find(
+      order => new Date(order.hour).getTime() === hour.getTime()
+    );
+    setEditingOrders({ tripId: trip._id, hour });
+    setOrderCount(existingOrder?.orderCount?.toString() || '');
+  };
+
+  const handleSaveOrders = async () => {
+    if (!editingOrders) return;
+
+    try {
+      const res = await fetch(`/api/entry/${editingOrders.tripId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderCount: parseInt(orderCount),
+          hour: editingOrders.hour
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update orders');
+      }
+
+      const updatedTrip = await res.json();
+      setTrips(trips.map(trip => 
+        trip._id === editingOrders.tripId ? updatedTrip : trip
+      ));
+      setEditingOrders(null);
+      setOrderCount('');
+    } catch (err) {
+      console.error('Error updating orders:', err);
+      setError(err.message);
+    }
+  };
+
+  const getHourlySlots = (trip) => {
+    const slots = [];
+    const start = new Date(trip.startDatetime);
+    const end = trip.endDatetime ? new Date(trip.endDatetime) : new Date();
+    
+    let current = new Date(start);
+    current.setMinutes(0, 0, 0);
+    
+    while (current <= end) {
+      slots.push(new Date(current));
+      current.setHours(current.getHours() + 1);
+    }
+    
+    return slots;
   };
 
   return (
@@ -455,6 +510,66 @@ export default function MileagePage() {
                             </div>
                           </div>
                         )}
+
+                        <div className="mt-4">
+                          <div className="text-sm text-text/60 mb-2 flex items-center gap-2">
+                            <Package className="w-4 h-4" />
+                            <span>Orders by Hour</span>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                            {getHourlySlots(trip).map((hour) => {
+                              const existingOrder = trip.hourlyOrders?.find(
+                                order => new Date(order.hour).getTime() === hour.getTime()
+                              );
+                              const isEditing = editingOrders?.tripId === trip._id && 
+                                editingOrders.hour.getTime() === hour.getTime();
+
+                              return (
+                                <div
+                                  key={hour.getTime()}
+                                  className="bg-white/[0.05] p-2 rounded flex items-center justify-between"
+                                >
+                                  <span className="text-sm">
+                                    {hour.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                  </span>
+                                  {isEditing ? (
+                                    <div className="flex items-center gap-1">
+                                      <input
+                                        type="number"
+                                        value={orderCount}
+                                        onChange={e => setOrderCount(e.target.value)}
+                                        className="bg-white/[0.1] px-2 py-1 rounded w-16 text-sm"
+                                        placeholder="0"
+                                      />
+                                      <button
+                                        onClick={handleSaveOrders}
+                                        className="p-1 hover:bg-white/[0.05] rounded"
+                                      >
+                                        <Check className="w-4 h-4 text-green-400" />
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingOrders(null)}
+                                        className="p-1 hover:bg-white/[0.05] rounded"
+                                      >
+                                        <X className="w-4 h-4 text-red-400" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <span>{existingOrder?.orderCount || 0}</span>
+                                      <button
+                                        onClick={() => handleOrderEdit(trip, hour)}
+                                        className="p-1 hover:bg-white/[0.05] rounded"
+                                      >
+                                        <Edit2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
