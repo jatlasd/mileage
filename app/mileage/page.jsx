@@ -458,25 +458,55 @@ export default function MileagePage() {
 
                         {trip.orders && trip.orders.length > 0 && (
                           <div className="mt-3 pt-3 border-t border-white/[0.05]">
-                            <div className="text-xs text-text/40 mb-2">Orders:</div>
-                            <div className="space-y-1">
-                              {trip.orders.map((order, index) => {
-                                const orderTime = new Date(order.time);
-                                return (
-                                  <div key={index} className="text-xs text-text/60 flex items-center gap-2">
-                                    <span>
-                                      {orderTime.toLocaleTimeString([], {
-                                        hour: 'numeric',
-                                        minute: '2-digit',
-                                        hour12: true
-                                      })}
-                                    </span>
-                                    <span className="text-text/40">
-                                      {order.id}
-                                    </span>
-                                  </div>
-                                );
-                              })}
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="text-xs text-text/40">Orders</div>
+                              <div className="text-xs text-text/30">·</div>
+                              <div className="text-xs text-text/40">{trip.orders.length} total</div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {(() => {
+                                const ordersByHour = {};
+                                trip.orders.forEach(order => {
+                                  const orderTime = new Date(order.time);
+                                  const hour = orderTime.getHours();
+                                  if (!ordersByHour[hour]) {
+                                    ordersByHour[hour] = [];
+                                  }
+                                  ordersByHour[hour].push(order);
+                                });
+
+                                return Object.entries(ordersByHour)
+                                  .sort(([hourA], [hourB]) => parseInt(hourA) - parseInt(hourB))
+                                  .map(([hour, orders]) => {
+                                    const hourNum = parseInt(hour);
+                                    const startTime = new Date();
+                                    startTime.setHours(hourNum, 0, 0, 0);
+                                    const endTime = new Date();
+                                    endTime.setHours(hourNum + 1, 0, 0, 0);
+
+                                    return (
+                                      <div 
+                                        key={hour} 
+                                        className="text-xs bg-white/[0.05] hover:bg-white/[0.08] px-3 py-1.5 rounded-md flex items-center gap-2 border border-white/[0.1] shadow-sm transition-colors"
+                                      >
+                                        <span className="text-text/80 font-medium">
+                                          {startTime.toLocaleTimeString([], {
+                                            hour: 'numeric',
+                                            hour12: true
+                                          })}
+                                          {' - '}
+                                          {endTime.toLocaleTimeString([], {
+                                            hour: 'numeric',
+                                            hour12: true
+                                          })}
+                                        </span>
+                                        <div className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-[10px] font-medium min-w-[16px] text-center">
+                                          {orders.length}
+                                        </div>
+                                      </div>
+                                    );
+                                  });
+                              })()}
                             </div>
                           </div>
                         )}
