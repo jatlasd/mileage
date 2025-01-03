@@ -565,9 +565,9 @@ export default function MileagePage() {
                                     return (
                                       <div
                                         key={hour}
-                                        className="text-xs bg-white/[0.05] hover:bg-white/[0.08] px-3 py-1.5 rounded-md flex items-center gap-2 border border-white/[0.1] shadow-sm transition-colors"
+                                        className="text-xs bg-[#1a1b26] hover:bg-[#1f2133] px-2.5 py-1 rounded flex items-center border border-white/[0.05] transition-colors"
                                       >
-                                        <span className="text-text/80 font-medium">
+                                        <span className="text-text/60 w-[85px]">
                                           {startTime.toLocaleTimeString([], {
                                             hour: "numeric",
                                             hour12: true,
@@ -578,7 +578,7 @@ export default function MileagePage() {
                                             hour12: true,
                                           })}
                                         </span>
-                                        <div className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-[10px] font-medium min-w-[16px] text-center">
+                                        <div className="bg-indigo-500/10 text-indigo-300/90 w-5 h-5 rounded flex items-center justify-center font-mono font-medium">
                                           {orders.length}
                                         </div>
                                       </div>
