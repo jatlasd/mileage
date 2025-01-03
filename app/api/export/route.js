@@ -70,7 +70,7 @@ export async function GET(request) {
     return new NextResponse(csvRows.join('\r\n'), {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="mileage_for_taxes.csv"`,
+        'Content-Disposition': `attachment; filename="DoordashMiles.csv"`,
       }
     });
   } catch (error) {
