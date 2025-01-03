@@ -455,6 +455,31 @@ export default function MileagePage() {
                             </div>
                           </div>
                         )}
+
+                        {trip.orders && trip.orders.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/[0.05]">
+                            <div className="text-xs text-text/40 mb-2">Orders:</div>
+                            <div className="space-y-1">
+                              {trip.orders.map((order, index) => {
+                                const orderTime = new Date(order.time);
+                                return (
+                                  <div key={index} className="text-xs text-text/60 flex items-center gap-2">
+                                    <span>
+                                      {orderTime.toLocaleTimeString([], {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                      })}
+                                    </span>
+                                    <span className="text-text/40">
+                                      {order.id}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

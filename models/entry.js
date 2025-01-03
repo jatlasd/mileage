@@ -7,7 +7,7 @@ const BreakSchema = new mongoose.Schema({
 });
 
 const OrderSchema = new mongoose.Schema({
-  time: { type: String },
+  time: { type: Date, default: Date.now },
 });
 
 const TripSchema = new mongoose.Schema({
