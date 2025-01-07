@@ -1,70 +1,18 @@
-"use client"
+import React from 'react'
 
-import { useState, useEffect } from 'react'
+const idsToUpdate = [
+  "67796b2c2029b99ea40431c2",
+  "67797e78d1e5b358e9f541f9",
+  "6779b74727a8472a5b85d3c9",
+  "677b0edc439d2a06ffeeb96f",
+  "677b396beed4268949cbc918",
+  "677c3d70f67471b2d29d5c1d",
+  "677c824405cab64f4f048c3c"
+]
 
 const Testing = () => {
-  const fetchEntries = async () => {
-    try {
-      const response = await fetch('/api/entry')
-      const data = await response.json()
-      console.log('All entries:', data)
-    } catch (error) {
-      console.error('Error fetching entries:', error)
-    }
-  }
-
-  const updateEntries = async () => {
-    try {
-      const response = await fetch('/api/entry')
-      const entries = await response.json()
-      
-      for (const entry of entries) {
-        if (!entry.month || !entry.dayOfWeek) {
-          const startDate = new Date(entry.startDatetime)
-          const estDate = new Date(startDate.toLocaleString('en-US', { timeZone: 'America/New_York' }))
-          
-          const month = estDate.getMonth() + 1
-          const dayOfWeek = estDate.getDay()
-          
-          const updateResponse = await fetch(`/api/entry/${entry._id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              month,
-              dayOfWeek
-            })
-          })
-          
-          if (updateResponse.ok) {
-            console.log(`Updated entry ${entry._id} with month: ${month}, dayOfWeek: ${dayOfWeek}`)
-          } else {
-            console.error(`Failed to update entry ${entry._id}`)
-          }
-        }
-      }
-      console.log('Finished updating entries')
-    } catch (error) {
-      console.error('Error updating entries:', error)
-    }
-  }
-
   return (
-    <div className="p-4 space-y-4">
-      <button 
-        onClick={fetchEntries}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Fetch All Entries
-      </button>
-      <button 
-        onClick={updateEntries}
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Update Missing Fields
-      </button>
-    </div>
+    <div>Testing</div>
   )
 }
 
