@@ -9,7 +9,7 @@ const Testing = () => {
       const data = await response.json()
       console.log('All entries:', data)
     } catch (error) {
-      console.error('Error fetching entrie:', error)
+      console.error('Error fetching entries:', error)
     }
   }
 
