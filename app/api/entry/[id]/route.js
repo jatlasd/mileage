@@ -3,7 +3,6 @@ import connectToDb from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import Trip from '@/models/entry';
 
-
 export async function PATCH(request, { params }) {
   try {
     await connectToDb();
