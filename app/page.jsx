@@ -51,7 +51,7 @@ export default function HomePage() {
       activeTrip.zone : 
       (isOtherZone ? otherZone : selectedZone);
       
-    console.log('Submitting with zone:', zoneToSend, 'selectedZone:', selectedZone, 'isOtherZone:', isOtherZone, 'otherZone:', otherZone);
+    console.log('Submitting with zon:', zoneToSend, 'selectedZone:', selectedZone, 'isOtherZone:', isOtherZone, 'otherZone:', otherZone);
 
     try {
       const res = await fetch('/api/entry', {
