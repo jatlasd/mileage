@@ -8,11 +8,17 @@ const BreakSchema = new mongoose.Schema({
 
 const OrderSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
+  type: {type: String, default: 'Food'},
+  accepted: { type: Boolean, default: true },
+  unassigned: { type: Boolean, default: false },
 });
 
 const TripSchema = new mongoose.Schema({
   startDatetime: { type: Date, default: Date.now },
   endDatetime: { type: Date },
+  month: { type: String },
+  dayOfWeek: { type: String },
+  zone: { type: String, default: 'Swedesboro' },
   startMileage: { type: Number, required: true },
   endMileage: { type: Number },
   tripMiles: { type: Number },
@@ -20,6 +26,14 @@ const TripSchema = new mongoose.Schema({
   breaks: [BreakSchema],
   orders: [OrderSchema],
   totalBreakDuration: { type: Number, default: 0 }
+});
+
+TripSchema.pre('save', function(next) {
+  if (this.startDatetime) {
+    this.month = this.startDatetime.toLocaleString('en-US', { month: 'long' });
+    this.dayOfWeek = this.startDatetime.toLocaleString('en-US', { weekday: 'long' });
+  }
+  next();
 });
 
 export const getAllTrips = async () => {

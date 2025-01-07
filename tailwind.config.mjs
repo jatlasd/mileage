@@ -12,6 +12,8 @@ export default {
 			background: '#1a1a2e', // Dark background
 			primary: '#e94560', // Accent color
 			text: '#ffffff', // Default text color
+			"accent-1": "#4a314d",
+			"accent-2": "#8B6B43",
 		  },
   		borderRadius: {
   			lg: 'var(--radius)',

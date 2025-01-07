@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
 import { Pause, Play, Plus } from 'lucide-react';
+import OrderDialog from '@/components/OrderDialog';
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
@@ -165,14 +166,10 @@ export default function HomePage() {
                     </>
                   )}
                 </button>
-                <button
-                  onClick={handleAddOrder}
-                  disabled={isOrderLoading || activeBreak}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors disabled:opacity-50 bg-green-500/20 hover:bg-green-500/30 text-green-400"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Order
-                </button>
+                <OrderDialog 
+                  tripId={activeTrip._id} 
+                  onOrderCreated={setActiveTrip}
+                />
               </div>
             </div>
           )}
