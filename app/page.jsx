@@ -12,6 +12,12 @@ export default function HomePage() {
   const [isBreakLoading, setIsBreakLoading] = useState(false);
   const [isOrderLoading, setIsOrderLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [selectedZone, setSelectedZone] = useState('')
+  const [isOtherZone, setIsOtherZone] = useState(false)
+  const [otherZone, setOtherZone] = useState('')
+
+  const buttonClass = 'relative px-4 py-3 border-2 border-text/50 rounded-xl text-lg bg-text/10 w-full transition-all duration-200 active:scale-[0.98]'
+  const selectedButtonClass = `${buttonClass} border-primary bg-primary/20 border-primary text-primary`
 
   useEffect(() => {
     const checkActiveTrip = async () => {
@@ -39,18 +45,34 @@ export default function HomePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!mileage) return;
+    if (!activeTrip && !selectedZone && !otherZone) return;
+
+    const zoneToSend = activeTrip ? 
+      activeTrip.zone : 
+      (isOtherZone ? otherZone : selectedZone);
+      
+    console.log('Submitting with zone:', zoneToSend, 'selectedZone:', selectedZone, 'isOtherZone:', isOtherZone, 'otherZone:', otherZone);
 
     try {
       const res = await fetch('/api/entry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mileage: Number(mileage) }),
+        body: JSON.stringify({ 
+          mileage: Number(mileage),
+          zone: zoneToSend
+        }),
       });
+      
+      console.log('Request body:', { mileage: Number(mileage), zone: zoneToSend });
+      
       if (!res.ok) throw new Error('Failed to submit mileage');
       
       const data = await res.json();
       setActiveTrip(data.trip.isActive ? data.trip : null);
       setMileage('');
+      setSelectedZone('');
+      setOtherZone('');
+      setIsOtherZone(false);
       
       if (!data.trip.isActive) {
         window.location.href = '/mileage';
@@ -90,30 +112,18 @@ export default function HomePage() {
     }
   };
 
-  const handleAddOrder = async () => {
-    if (!activeTrip) return;
-    
-    setIsOrderLoading(true);
-    try {
-      const res = await fetch(`/api/entry/${activeTrip._id}/order`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to add order');
-      }
-
-      const updatedTrip = await res.json();
-      setActiveTrip(updatedTrip);
-    } catch (err) {
-      console.error(err);
-      alert('Error adding order');
-    } finally {
-      setIsOrderLoading(false);
-    }
-  };
+const handleSelectZone = (zone) => {
+  console.log('handleSelectZone called with:', zone);
+  if (zone === 'other') {
+    setIsOtherZone(true);
+    setSelectedZone('');
+  } else {
+    setSelectedZone(zone);
+    setIsOtherZone(false);
+    setOtherZone('');
+  }
+  console.log('After setting zone - selectedZone:', zone, 'isOtherZone:', false);
+}
 
   if (isLoading) {
     return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
@@ -175,7 +185,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 mt-[25%] mb-8">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-auto mb-8">
           <div className="space-y-2">
             <label className="text-sm text-text/70 px-1">
               {activeTrip ? 'Enter ending mileage' : 'Enter starting mileage'}
@@ -186,13 +196,64 @@ export default function HomePage() {
               step="0.1"
               value={mileage}
               onChange={(e) => setMileage(e.target.value)}
-              className="w-full h-16 px-4 border border-white/10 rounded-xl bg-white/[0.07] text-2xl font-mono placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/[0.09] transition-all"
+              className="w-full h-14 px-4 border border-white/10 rounded-xl bg-white/[0.07] text-2xl font-mono placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/[0.09] transition-all"
               required
             />
           </div>
+
+          {!activeTrip && (
+            <div className="space-y-2">
+              <label className="text-sm text-text/70 px-1">Select delivery zone</label>
+              <div className='grid grid-cols-2 gap-3'>
+                <button 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectZone('Swedesboro');
+                  }}
+                  className={selectedZone === 'Swedesboro' ? selectedButtonClass : buttonClass}
+                >
+                  Swedesboro
+                </button>
+                <button 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectZone('Deptford');
+                  }}
+                  className={selectedZone === 'Deptford' ? selectedButtonClass : buttonClass}
+                >
+                  Deptford
+                </button>
+                <button 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectZone('other');
+                  }}
+                  className={isOtherZone ? selectedButtonClass : buttonClass}
+                >
+                  Other
+                </button>
+              </div>
+              
+              {isOtherZone && (
+                <input
+                  type="text"
+                  value={otherZone}
+                  placeholder='Enter zone name'
+                  onChange={(e) => setOtherZone(e.target.value)}
+                  className="w-full h-14 mt-3 px-4 border border-white/10 rounded-xl bg-white/[0.07] text-lg placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/[0.09] transition-all"
+                  required
+                />
+              )}
+            </div>
+          )}
+
           <button 
             type="submit" 
-            className="w-full h-16 bg-primary text-white text-lg font-medium rounded-xl active:scale-[0.98] transition-transform shadow-lg shadow-primary/20"
+            disabled={!mileage || (!activeTrip && (!selectedZone && !otherZone))}
+            className="w-full h-14 bg-primary text-white text-lg font-medium rounded-xl active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
           >
             {activeTrip ? 'End Trip' : 'Start Trip'}
           </button>

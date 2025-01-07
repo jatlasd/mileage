@@ -45,7 +45,10 @@ export const POST = async (request) => {
     const activeTrip = await Trip.findOne({ isActive: true });
 
     if (!activeTrip) {
-      const newTrip = new Trip({ startMileage: body.mileage });
+      const newTrip = new Trip({ 
+        startMileage: body.mileage,
+        zone: body.zone
+      });
       await newTrip.save();
       return new Response(JSON.stringify({ success: true, trip: newTrip }), { 
         status: 201,
