@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import Select from "./ui/Select";
+import CustomSelect from "./CustomSelect";
 
 const FilterBar = memo(function FilterBar({
   filterPeriod,
@@ -32,14 +32,14 @@ const FilterBar = memo(function FilterBar({
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-4">
         <h2 className="text-sm font-medium text-text/60">RECENT TRIPS</h2>
-        <Select
+        <CustomSelect
           value={filterPeriod}
           onChange={onFilterPeriodChange}
           options={periodOptions}
         />
       </div>
       <div className="flex items-center gap-4">
-        <Select
+        <CustomSelect
           value={filterYear}
           onChange={onFilterYearChange}
           options={yearOptions}
