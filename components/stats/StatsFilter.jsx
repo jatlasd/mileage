@@ -16,7 +16,7 @@ const months = [
 ]
 
 const daysOfWeek = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+  "Sunday", "Monday", "Tuesda", "Wednesday", "Thursday", "Friday", "Saturday"
 ]
 
 const StatsFilter = ({ trips, setFilteredTrips }) => {
