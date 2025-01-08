@@ -29,7 +29,7 @@ const Stats = () => {
   if(isLoading) return <h1>Loading</h1>
 
   return (
-    <div className='min-h-[100dvh] bg-background text-text flex flex-col'>
+    <div className='min-h-[100dvh] bg-background text-text/10 flex flex-col'>
       <StatsFilter trips={trips} setFilteredTrips={setFilteredTrips}/>
     </div>
   )
