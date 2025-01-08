@@ -56,7 +56,7 @@ const StatsFilter = ({ trips, setFilteredTrips }) => {
   return (
     <div className="flex gap-4 items-center">
       <Select value={selectedMonth} onValueChange={handleMonthChange}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[179px]">
           <SelectValue placeholder="Select month" />
         </SelectTrigger>
         <SelectContent>
