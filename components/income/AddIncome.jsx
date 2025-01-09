@@ -90,7 +90,7 @@ const AddIncome = ({ refresh, setRefresh }) => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto border border-text/10 bg-card rounded-lg shadow-sm">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto border border-text/10 bg-card rounded-lg shadow-sm">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -100,16 +100,16 @@ const AddIncome = ({ refresh, setRefresh }) => {
             control={form.control}
             name="month"
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem className="flex-1 w-full">
                 <FormLabel className="text-text/70">Month</FormLabel>
                 <FormControl>
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="bg-background border-text/10">
+                    <SelectTrigger className="bg-background border-text/10 h-10 text-sm focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
                       <SelectValue placeholder="Select month" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background border-text/10">
                       {months.map((month, index) => (
-                        <SelectItem key={index} value={month}>
+                        <SelectItem key={index} value={month} className="text-sm">
                           {month}
                         </SelectItem>
                       ))}
@@ -124,16 +124,16 @@ const AddIncome = ({ refresh, setRefresh }) => {
             control={form.control}
             name="week"
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem className="flex-1 w-full">
                 <FormLabel className="text-text/70">Week</FormLabel>
                 <FormControl>
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="bg-background border-text/10">
+                    <SelectTrigger className="bg-background border-text/10 h-10 text-sm focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
                       <SelectValue placeholder="Select week" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-background border-text/10">
                       {[...Array(5)].map((_, index) => (
-                        <SelectItem key={index} value={String(index + 1)}>
+                        <SelectItem key={index} value={String(index + 1)} className="text-sm">
                           Week {index + 1}
                         </SelectItem>
                       ))}
@@ -148,13 +148,13 @@ const AddIncome = ({ refresh, setRefresh }) => {
             control={form.control}
             name="amount"
             render={({ field }) => (
-              <FormItem className="flex-1">
+              <FormItem className="flex-1 w-full">
                 <FormLabel className="text-text/70">Amount</FormLabel>
                 <FormControl>
                   <Input 
                     placeholder="Enter amount" 
                     {...field} 
-                    className="bg-background border-text/10"
+                    className="bg-background border-text/10 h-10 text-sm focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                   />
                 </FormControl>
                 <FormMessage />
@@ -163,7 +163,7 @@ const AddIncome = ({ refresh, setRefresh }) => {
           />
           <Button 
             type="submit" 
-            className="bg-primary hover:bg-primary/90 transition-colors w-full md:w-auto"
+            className="bg-primary hover:bg-primary/90 transition-colors w-full md:w-auto h-10"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
