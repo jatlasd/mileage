@@ -9,8 +9,8 @@ export const POST = async (req) => {
 
     const income = await Income.create({
       amount: body.amount,
-      startDate: body.startDate,
-      endDate: body.endDate,
+      month: body.month,
+      week: body.week,
     });
 
     return NextResponse.json(income, { status: 201 });

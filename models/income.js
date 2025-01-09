@@ -2,15 +2,15 @@ import mongoose from 'mongoose'
 
 const incomeSchema = new mongoose.Schema({
     amount: {
+        type: Number,
+        required: true
+    },
+    month: {
         type: String,
         required: true
     },
-    startDate: {
-        type: Date,
-        required: true
-    },
-    endDate: {
-        type: Date,
+    week: {
+        type: Number,
         required: true
     },
     createdAt: {
