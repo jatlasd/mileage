@@ -7,6 +7,7 @@ export async function PATCH(request, { params }) {
   try {
     await connectToDb();
     const { id } = await params;
+    const { type, accepted } = await request.json();
 
     const trip = await Trip.findByIdAndUpdate(
       id,
@@ -14,6 +15,8 @@ export async function PATCH(request, { params }) {
         $push: {
           orders: {
             time: new Date(),
+            type,
+            accepted
           },
         },
       },
