@@ -22,6 +22,10 @@ const OrderCard = ({ order }) => {
                 <span className='font-medium'>{orderTime}</span>
             </div>
             <div className='flex flex-col gap-1'>
+                <span className='text-sm text-white/70'>Hour</span>
+                <span className='font-medium'>{order.hourBlock}</span>
+            </div>
+            <div className='flex flex-col gap-1'>
                 <span className='text-sm text-white/70'>Type</span>
                 <span className='font-medium'>{order.type}</span>
             </div>

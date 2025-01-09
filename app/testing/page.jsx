@@ -50,6 +50,46 @@ const Testing = () => {
     }
   }
 
+  const updateOrderHourBlocks = async () => {
+    try {
+      const response = await fetch('/api/entry')
+      const entries = await response.json()
+      console.log('Fetched entries:', entries.length)
+      
+      for (const entry of entries) {
+        if (entry.orders && entry.orders.length > 0) {
+          const updatedOrders = entry.orders.map(order => {
+            const orderTime = new Date(order.time)
+            const estOrderTime = new Date(orderTime.toLocaleString('en-US', { timeZone: 'America/New_York' }))
+            const hour = estOrderTime.getHours()
+            const nextHour = (hour + 1) % 24
+            const hourBlock = `${hour % 12 || 12}${hour < 12 ? 'am' : 'pm'} - ${nextHour % 12 || 12}${nextHour < 12 ? 'am' : 'pm'}`
+            return { ...order, hourBlock }
+          })
+
+          const updateResponse = await fetch(`/api/entry/${entry._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orders: updatedOrders
+            })
+          })
+          
+          if (updateResponse.ok) {
+            console.log(`Updated orders for entry ${entry._id}`)
+          } else {
+            console.error(`Failed to update orders for entry ${entry._id}`)
+          }
+        }
+      }
+      console.log('Finished updating all orders')
+    } catch (error) {
+      console.error('Error updating order hour blocks:', error)
+    }
+  }
+
   return (
     <div className="p-4 space-y-4">
       <button 
@@ -63,6 +103,12 @@ const Testing = () => {
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
       >
         Update Missing Fields
+      </button>
+      <button 
+        onClick={updateOrderHourBlocks}
+        className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Update Order Hour Blocks
       </button>
     </div>
   )

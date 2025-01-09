@@ -8,6 +8,7 @@ const BreakSchema = new mongoose.Schema({
 
 const OrderSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
+  hourBlock: { type: String },
   type: {type: String, default: 'Food'},
   accepted: { type: Boolean, default: true },
   unassigned: { type: Boolean, default: false },
