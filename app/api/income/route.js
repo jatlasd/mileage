@@ -21,3 +21,9 @@ export const POST = async (req) => {
     );
   }
 }
+
+export const GET = async (req) => {
+    await connectDB();
+    const income = await Income.find().sort({ month: -1 });
+    return NextResponse.json(income);
+}
