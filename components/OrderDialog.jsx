@@ -44,7 +44,7 @@ const OrderDialog = ({ tripId, onOrderCreated }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133] transition-all duration-200 px-4 py-2 rounded-lg hover:scale-105 active:scale-95">
+        <button className="bg-[#1a1b26] border border-white/[0.2] text-white/80 hover:bg-[#1f2133] transition-all duration-200 px-4 py-2 rounded-lg hover:scale-105 active:scale-95">
           Add Order
         </button>
       </DialogTrigger>
