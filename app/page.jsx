@@ -185,7 +185,7 @@ const handleSelectZone = (zone) => {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-auto mb-8">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-[15%]">
           <div className="space-y-2">
             <label className="text-sm text-text/70 px-1">
               {activeTrip ? 'Enter ending mileage' : 'Enter starting mileage'}
