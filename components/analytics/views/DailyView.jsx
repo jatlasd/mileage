@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const DailyView = ({ selectedDay }) => {
   const [dailyStats, setDailyStats] = useState(null)
@@ -70,7 +76,7 @@ const DailyView = ({ selectedDay }) => {
   }
 
   const getAcceptanceRateValue = () => {
-    if (acceptanceRate === null) return 'Loading...'
+    if (acceptanceRate === null) return '0%'
     return `${acceptanceRate}%`
   }
 
@@ -81,21 +87,56 @@ const DailyView = ({ selectedDay }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard
-          title="Daily Average"
-          value={getDailyAverage()}
-          subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
-        />
-        <StatCard
-          title="Best Time"
-          value={getBestTimeValue()}
-          subtitle={getBestTimeSubtitle()}
-        />
-        <StatCard
-          title="Acceptance Rate"
-          value={getAcceptanceRateValue()}
-          subtitle={getAcceptanceRateSubtitle()}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatCard
+                  title="Daily Average"
+                  value={getDailyAverage()}
+                  subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] p-4">
+              <p>The average number of orders you get per day. When viewing 'All Days', this shows your overall average. When a specific day is selected, it shows that day's typical performance.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatCard
+                  title="Best Time"
+                  value={getBestTimeValue()}
+                  subtitle={getBestTimeSubtitle()}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] p-4">
+              <p>The busiest hour of the day for orders. When viewing 'All Days', it also shows which day of the week is typically busiest. This helps you plan the best times to schedule yourself.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatCard
+                  title="Acceptance Rate"
+                  value={getAcceptanceRateValue()}
+                  subtitle={getAcceptanceRateSubtitle()}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] p-4">
+              <p>The percentage of orders you accept. A higher rate on certain days might mean better quality orders, while a lower rate might indicate more low-value orders to skip.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
