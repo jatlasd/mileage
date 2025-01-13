@@ -17,6 +17,7 @@ const DailyView = ({ selectedDay }) => {
   const [acceptanceRate, setAcceptanceRate] = useState(null)
   const [weeklyPattern, setWeeklyPattern] = useState(null)
   const [dailyHourlyData, setDailyHourlyData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const dayMapping = {
     'Mon': 'Monday',
@@ -38,6 +39,7 @@ const DailyView = ({ selectedDay }) => {
   }
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchDailyStats = async () => {
       try {
         const response = await fetch(`/api/analytics/daily?day=${selectedDay}`)
@@ -63,19 +65,17 @@ const DailyView = ({ selectedDay }) => {
     }
 
     const fetchDailyHourlyBreakdown = async () => {
-        try {
-            const response = await fetch(`/api/analytics/daily/hourly?day=${dayMapping[selectedDay]}`)
-            const data = await response.json()
-            console.log('Hourly data received:', data)
-            setDailyHourlyData(data.hourlyStats)
-            console.log('Set hourly stats:', data.hourlyStats)
-        } catch (error) {
-            console.error('Failed to fetch daily hourly breakdown:', error)
-        }
+      try {
+        const response = await fetch(`/api/analytics/daily/hourly?day=${dayMapping[selectedDay]}`)
+        const data = await response.json()
+        setDailyHourlyData(data.hourlyStats)
+      } catch (error) {
+        console.error('Failed to fetch daily hourly breakdown:', error)
+      }
     }
 
-    fetchDailyHourlyBreakdown()
-    fetchDailyStats()
+    Promise.all([fetchDailyHourlyBreakdown(), fetchDailyStats()])
+      .finally(() => setIsLoading(false))
   }, [selectedDay])
 
   const getDailyAverage = () => {
@@ -111,6 +111,36 @@ const DailyView = ({ selectedDay }) => {
     return selectedDay === 'all' ? 'Overall average' : `${dayMapping[selectedDay]}s only`
   }
 
+  const LoadingChart = ({ height }) => (
+    <div 
+      className="flex items-center justify-center animate-pulse" 
+      style={{ height: `${height}px` }}
+    >
+      <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+        <svg 
+          className="animate-spin h-8 w-8 text-primary" 
+          xmlns="http://www.w3.org/2000/svg" 
+          fill="none" 
+          viewBox="0 0 24 24"
+        >
+          <circle 
+            className="opacity-25" 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            strokeWidth="4"
+          />
+          <path 
+            className="opacity-75" 
+            fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      </div>
+    </div>
+  )
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -120,7 +150,7 @@ const DailyView = ({ selectedDay }) => {
               <div>
                 <StatCard
                   title="Daily Average"
-                  value={getDailyAverage()}
+                  value={isLoading ? "Loading..." : getDailyAverage()}
                   subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
                 />
               </div>
@@ -137,7 +167,7 @@ const DailyView = ({ selectedDay }) => {
               <div>
                 <StatCard
                   title="Best Time"
-                  value={getBestTimeValue()}
+                  value={isLoading ? "Loading..." : getBestTimeValue()}
                   subtitle={getBestTimeSubtitle()}
                 />
               </div>
@@ -154,7 +184,7 @@ const DailyView = ({ selectedDay }) => {
               <div>
                 <StatCard
                   title="Acceptance Rate"
-                  value={getAcceptanceRateValue()}
+                  value={isLoading ? "Loading..." : getAcceptanceRateValue()}
                   subtitle={getAcceptanceRateSubtitle()}
                 />
               </div>
@@ -172,7 +202,9 @@ const DailyView = ({ selectedDay }) => {
           subtitle={selectedDay === 'all' ? "Orders by day" : dayMapping[selectedDay]}
           height={300}
         >
-          {selectedDay === 'all' ? (
+          {isLoading ? (
+            <LoadingChart height={300} />
+          ) : selectedDay === 'all' ? (
             <WeeklyPatternChart data={weeklyPattern} />
           ) : (
             <DailyHourlyChart data={dailyHourlyData} />
@@ -184,20 +216,20 @@ const DailyView = ({ selectedDay }) => {
           subtitle="vs Previous Week"
           height={300}
         >
-          Day-by-day comparison
+          {isLoading ? <LoadingChart height={300} /> : "Day-by-day comparison"}
         </ChartCard>
       </div>
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <ChartCard title="Current Hour Stats" height={180}>
-            Current hour stats
+            {isLoading ? <LoadingChart height={180} /> : "Current hour stats"}
           </ChartCard>
           <ChartCard title="Peak Hours" height={180}>
-            Peak hours distribution
+            {isLoading ? <LoadingChart height={180} /> : "Peak hours distribution"}
           </ChartCard>
           <ChartCard title="Acceptance Rates" height={180}>
-            Hourly acceptance rates
+            {isLoading ? <LoadingChart height={180} /> : "Hourly acceptance rates"}
           </ChartCard>
         </div>
         
@@ -207,14 +239,14 @@ const DailyView = ({ selectedDay }) => {
             subtitle="By hour of day"
             height={300}
           >
-            Order types by hour
+            {isLoading ? <LoadingChart height={300} /> : "Order types by hour"}
           </ChartCard>
           <ChartCard
             title="Earnings Distribution"
             subtitle="By hour"
             height={300}
           >
-            Hourly earnings
+            {isLoading ? <LoadingChart height={300} /> : "Hourly earnings"}
           </ChartCard>
         </div>
       </div>
