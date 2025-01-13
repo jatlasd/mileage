@@ -2,79 +2,44 @@
 import { connectToDb } from '@/lib/mongodb'
 import Trip from '@/models/entry'
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const day = searchParams.get('day');
+
+    if (!day) {
+      return Response.json({ error: 'Day parameter is required' }, { status: 400 });
+    }
+
     await connectToDb();
     
-    // Busiest days analysis
-    const busiestDays = await Trip.aggregate([
-      { $unwind: "$orders" },
-      { $group: {
-        _id: { dayOfWeek: "$dayOfWeek", month: "$month" },
-        orderCount: { $sum: 1 }
+    const hourlyStats = await Trip.aggregate([
+      { $match: { 
+        dayOfWeek: day,
+        "orders.0": { $exists: true }
       }},
-      { $sort: { orderCount: -1 }}
-    ]);
-
-    // Busiest hours analysis
-    const busiestHours = await Trip.aggregate([
       { $unwind: "$orders" },
       { $group: {
-        _id: { hourBlock: "$orders.hourBlock" },
-        orderCount: { $sum: 1 }
-      }},
-      { $sort: { orderCount: -1 }}
-    ]);
-
-    // Orders by type analysis
-    const ordersByType = await Trip.aggregate([
-      { $unwind: "$orders" },
-      { $group: {
-        _id: { 
-          type: "$orders.type",
-          dayOfWeek: "$dayOfWeek"
-        },
-        orderCount: { $sum: 1 }
-      }},
-      { $sort: { orderCount: -1 }}
-    ]);
-
-    // Acceptance rate analysis
-    const acceptanceRates = await Trip.aggregate([
-      { $unwind: "$orders" },
-      { $group: {
-        _id: "$dayOfWeek",
+        _id: "$orders.hourBlock",
         totalOrders: { $sum: 1 },
-        acceptedOrders: {
-          $sum: { $cond: ["$orders.accepted", 1, 0] }
-        }
+        uniqueDays: { $addToSet: "$_id" }
       }},
       { $project: {
-        dayOfWeek: "$_id",
-        acceptanceRate: {
-          $multiply: [
-            { $divide: ["$acceptedOrders", "$totalOrders"] },
-            100
-          ]
-        },
+        hourBlock: "$_id",
+        _id: 0,
         totalOrders: 1,
-        acceptedOrders: 1
-      }}
+        uniqueDayCount: { $size: "$uniqueDays" },
+        averageOrders: {
+          $round: [
+            { $divide: ["$totalOrders", { $size: "$uniqueDays" }] },
+            2
+          ]
+        }
+      }},
+      { $sort: { hourBlock: 1 }}
     ]);
 
-    console.log({
-      busiestDays,
-      busiestHours,
-      ordersByType,
-      acceptanceRates
-    });
-
-    return Response.json({
-      busiestDays,
-      busiestHours,
-      ordersByType,
-      acceptanceRates
-    });
+    return Response.json({ hourlyStats });
   } catch (error) {
     console.error('Analytics Error:', error);
     return Response.json({ error: 'Failed to fetch analytics' }, { status: 500 });
