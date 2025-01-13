@@ -27,8 +27,6 @@ export async function GET(request) {
       ...(selectedDay && selectedDay !== 'all' ? { dayOfWeek: selectedDay } : {})
     }
 
-    console.log('Match stage:', matchStage)
-
     const hourlyStats = await Trip.aggregate([
       { $match: matchStage },
       { $unwind: "$orders" },
@@ -61,8 +59,6 @@ export async function GET(request) {
       { $sort: { averageOrders: -1 }}
     ])
 
-    console.log('Hourly stats:', JSON.stringify(hourlyStats, null, 2))
-
     const bestHoursByDay = {}
     hourlyStats.forEach(stat => {
       if (!bestHoursByDay[stat.day] || bestHoursByDay[stat.day].averageOrders < stat.averageOrders) {
@@ -74,8 +70,6 @@ export async function GET(request) {
         }
       }
     })
-
-    console.log('Best hours by day:', JSON.stringify(bestHoursByDay, null, 2))
 
     const acceptanceStats = await Trip.aggregate([
       { $match: matchStage },
@@ -110,8 +104,6 @@ export async function GET(request) {
       { $sort: { day: 1 }}
     ])
 
-    console.log('Acceptance stats:', JSON.stringify(acceptanceStats, null, 2))
-
     const dailyStats = await Trip.aggregate([
       { $match: matchStage },
       { $unwind: "$orders" },
@@ -140,8 +132,6 @@ export async function GET(request) {
       { $sort: { averageOrders: -1 }}
     ])
 
-    console.log('Daily stats:', JSON.stringify(dailyStats, null, 2))
-
     let bestTimeData
     let busiestDay = null
     let acceptanceRate = null
@@ -150,8 +140,6 @@ export async function GET(request) {
       bestTimeData = bestHoursByDay[selectedDay] || { hour: 'No data', averageOrders: 0 }
       const dayAcceptance = acceptanceStats.find(stat => stat.day === selectedDay)
       acceptanceRate = dayAcceptance ? dayAcceptance.acceptanceRate : 0
-      console.log(`Best time for ${selectedDay}:`, bestTimeData)
-      console.log(`Acceptance rate for ${selectedDay}:`, acceptanceRate)
     } else {
       const allHours = Object.values(bestHoursByDay)
       bestTimeData = allHours.reduce((best, current) => 
@@ -169,10 +157,6 @@ export async function GET(request) {
         const totalAcceptanceRate = acceptanceStats.reduce((sum, stat) => sum + stat.acceptanceRate, 0)
         acceptanceRate = +(totalAcceptanceRate / acceptanceStats.length).toFixed(1)
       }
-      
-      console.log('Best time overall:', bestTimeData)
-      console.log('Busiest day:', busiestDay)
-      console.log('Overall acceptance rate:', acceptanceRate)
     }
 
     return Response.json({ 
@@ -185,7 +169,6 @@ export async function GET(request) {
       acceptanceRate
     })
   } catch (error) {
-    console.error('Analytics Error:', error)
     return Response.json({ error: 'Failed to fetch analytics' }, { status: 500 })
   }
 } 
