@@ -9,5 +9,26 @@ body {
 @layer base {
   :root {
     --radius: 0.5rem;
+    
+    --background: 240 20% 14%;
+    --surface: 240 25% 22%;
+    --primary: 348 77% 59%;
+    --text: 0 0% 100%;
+    --accent-1: 297 23% 25%;
+    --accent-2: 35 35% 40%;
+
+    --chart-1: var(--primary);
+    --chart-2: 213 90% 65%;
+    --chart-3: 262 83% 68%;
+    --chart-4: 187 90% 65%;
+    --chart-5: 150 83% 68%;
+  }
+
+  .dark {
+    --chart-1: var(--primary);
+    --chart-2: 213 90% 65%;
+    --chart-3: 262 83% 68%;
+    --chart-4: 187 90% 65%;
+    --chart-5: 150 83% 68%;
   }
 }

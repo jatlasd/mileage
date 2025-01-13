@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
+import { WeeklyPatternChart } from '../charts/WeeklyPatternChart'
+import { DailyHourlyChart } from '../charts/DailyHourlyChart'
 import {
   Tooltip,
   TooltipContent,
@@ -13,6 +15,8 @@ const DailyView = ({ selectedDay }) => {
   const [bestTime, setBestTime] = useState(null)
   const [busiestDay, setBusiestDay] = useState(null)
   const [acceptanceRate, setAcceptanceRate] = useState(null)
+  const [weeklyPattern, setWeeklyPattern] = useState(null)
+  const [dailyHourlyData, setDailyHourlyData] = useState(null)
 
   const dayMapping = {
     'Mon': 'Monday',
@@ -26,7 +30,6 @@ const DailyView = ({ selectedDay }) => {
   }
 
   const formatDayDisplay = (day) => {
-    // Convert full names back to abbreviated for display
     const reverseMapping = Object.entries(dayMapping).reduce((acc, [short, full]) => {
       acc[full] = short
       return acc
@@ -43,11 +46,35 @@ const DailyView = ({ selectedDay }) => {
         setBestTime(data.bestTime)
         setBusiestDay(data.busiestDay)
         setAcceptanceRate(data.acceptanceRate)
+        
+        if (selectedDay === 'all') {
+          const pattern = data.dailyStats.reduce((acc, stat) => {
+            const shortDay = formatDayDisplay(stat.day)
+            acc[shortDay] = stat
+            return acc
+          }, {})
+          setWeeklyPattern(pattern)
+        } else {
+          setWeeklyPattern(data.weeklyPattern)
+        }
       } catch (error) {
         console.error('Failed to fetch daily stats:', error)
       }
     }
 
+    const fetchDailyHourlyBreakdown = async () => {
+        try {
+            const response = await fetch(`/api/analytics/daily/hourly?day=${dayMapping[selectedDay]}`)
+            const data = await response.json()
+            console.log('Hourly data received:', data)
+            setDailyHourlyData(data.hourlyStats)
+            console.log('Set hourly stats:', data.hourlyStats)
+        } catch (error) {
+            console.error('Failed to fetch daily hourly breakdown:', error)
+        }
+    }
+
+    fetchDailyHourlyBreakdown()
     fetchDailyStats()
   }, [selectedDay])
 
@@ -86,7 +113,7 @@ const DailyView = ({ selectedDay }) => {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -141,11 +168,15 @@ const DailyView = ({ selectedDay }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard
-          title="Weekly Pattern"
-          subtitle="Orders by day"
+          title={selectedDay === 'all' ? "Weekly Pattern" : "24-Hour Pattern"}
+          subtitle={selectedDay === 'all' ? "Orders by day" : dayMapping[selectedDay]}
           height={300}
         >
-          Weekly distribution chart
+          {selectedDay === 'all' ? (
+            <WeeklyPatternChart data={weeklyPattern} />
+          ) : (
+            <DailyHourlyChart data={dailyHourlyData} />
+          )}
         </ChartCard>
 
         <ChartCard
@@ -172,18 +203,18 @@ const DailyView = ({ selectedDay }) => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
-            title="24-Hour Pattern"
-            subtitle={selectedDay === 'all' ? 'Average' : dayMapping[selectedDay]}
-            height={300}
-          >
-            24-hour distribution chart
-          </ChartCard>
-          <ChartCard
             title="Hourly Type Split"
             subtitle="By hour of day"
             height={300}
           >
             Order types by hour
+          </ChartCard>
+          <ChartCard
+            title="Earnings Distribution"
+            subtitle="By hour"
+            height={300}
+          >
+            Hourly earnings
           </ChartCard>
         </div>
       </div>
