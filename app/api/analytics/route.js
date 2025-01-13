@@ -16,7 +16,7 @@ export async function GET(request) {
     const hourlyStats = await Trip.aggregate([
       { $match: { 
         dayOfWeek: day,
-        "orders.1": { $exists: true }
+        "orders.0": { $exists: true }
       }},
       { $unwind: "$orders" },
       { $group: {
