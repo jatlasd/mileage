@@ -28,9 +28,6 @@ export async function GET(request) {
           },
           count: { $sum: 1 },
           totalEarnings: { $sum: "$orders.total" },
-          acceptedCount: {
-            $sum: { $cond: [{ $eq: ["$orders.accepted", true] }, 1, 0] }
-          },
           uniqueDays: {
             $addToSet: {
               $dateToString: {
@@ -52,15 +49,6 @@ export async function GET(request) {
               2
             ]
           },
-          acceptanceRate: {
-            $round: [
-              { $multiply: [
-                { $divide: ["$acceptedCount", "$count"] },
-                100
-              ]},
-              1
-            ]
-          },
           ordersPerDay: {
             $round: [
               { $divide: ["$count", { $size: "$uniqueDays" }] },
@@ -77,7 +65,6 @@ export async function GET(request) {
       if (!hourlyStats[stat.hour]) {
         hourlyStats[stat.hour] = {
           total: 0,
-          acceptanceRate: 0,
           averageEarnings: 0,
           types: {}
         }
@@ -85,12 +72,10 @@ export async function GET(request) {
       
       hourlyStats[stat.hour].types[stat.type] = {
         count: stat.ordersPerDay,
-        acceptanceRate: stat.acceptanceRate,
         averageEarnings: stat.averageEarnings
       }
       
       hourlyStats[stat.hour].total += stat.ordersPerDay
-      hourlyStats[stat.hour].acceptanceRate = stat.acceptanceRate
       hourlyStats[stat.hour].averageEarnings += stat.averageEarnings
     })
 
