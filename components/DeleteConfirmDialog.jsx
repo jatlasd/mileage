@@ -16,7 +16,7 @@ export default function DeleteConfirmDialog({ onConfirm }) {
     <Dialog>
       <DialogTrigger asChild>
         <button className="p-1 hover:bg-white/10 rounded">
-          <Trash2 className="w-4 h-4 text-red-400" />
+          <Trash2 className="w-4 h-4 text-primary" />
         </button>
       </DialogTrigger>
       <DialogContent className="bg-[#1a1b26] border border-white/[0.1]">

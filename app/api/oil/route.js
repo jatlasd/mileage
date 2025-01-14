@@ -9,7 +9,7 @@ export const POST = async (request) => {
 
     const oilChange = await OilChange.create({
       mileage: body.mileage,
-      date: new Date(),
+      lastChange: new Date(),
     });
 
     return NextResponse.json(oilChange, { status: 201 });
@@ -25,27 +25,26 @@ export const PATCH = async (request) => {
   try {
     await connectToDb();
     const body = await request.json();
-    const { id, mileage } = body;
+    const lastOilChange = await OilChange.findOne().sort({ date: -1 });
 
-    if (!id || !mileage) {
+    if (!lastOilChange) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    const oilChange = await OilChange.findByIdAndUpdate(
-      id,
-      { mileage },
-      { new: true, runValidators: true }
-    );
-    if (!oilChange) {
-      return NextResponse.json(
-        { error: "Oil change entry not found" },
+        { error: "No oil change entry found" },
         { status: 404 }
       );
     }
-    return NextResponse.json(oilChange);
+
+    if (body.mileage !== undefined) {
+      lastOilChange.mileage = body.mileage;
+      lastOilChange.lastChange = new Date();
+    }
+    
+    if (body.currentlyNeeds !== undefined) {
+      lastOilChange.currentlyNeeds = body.currentlyNeeds;
+    }
+
+    await lastOilChange.save();
+    return NextResponse.json(lastOilChange);
   } catch (error) {
     if (error.name === "ValidationError") {
       return NextResponse.json(

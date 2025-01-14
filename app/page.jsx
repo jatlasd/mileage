@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
 import { Pause, Play, Plus } from 'lucide-react';
 import OrderDialog from '@/components/OrderDialog';
+import UpdateMileageDialog from '@/components/UpdateMileageDialog';
 import { checkOil } from '@/lib/checkOil';
 
 
@@ -17,6 +18,7 @@ export default function HomePage() {
   const [selectedZone, setSelectedZone] = useState('')
   const [isOtherZone, setIsOtherZone] = useState(false)
   const [otherZone, setOtherZone] = useState('')
+  const [needsOilChange, setNeedsOilChange] = useState(false)
 
   const buttonClass = 'relative px-4 py-3 border-2 border-text/50 rounded-xl text-lg bg-text/10 w-full transition-all duration-200 active:scale-[0.98]'
   const selectedButtonClass = `${buttonClass} border-primary bg-primary/20 border-primary text-primary`
@@ -43,6 +45,19 @@ export default function HomePage() {
       return () => clearInterval(timer);
     }
   }, [activeTrip]);
+
+  useEffect(() => {
+    const checkOilStatus = async () => {
+      try {
+        const res = await fetch('/api/oil')
+        const data = await res.json()
+        setNeedsOilChange(data.currentlyNeeds || false)
+      } catch (error) {
+        console.error('Error checking oil status:', error)
+      }
+    }
+    checkOilStatus()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,9 +92,9 @@ export default function HomePage() {
         const needsOilChange = await checkOil(Number(mileage))
 
         if(needsOilChange === true) {
-          console.log('need change')
+          setNeedsOilChange(true)
         } else {
-          console.log('no need change')
+          return
         }
         // window.location.href = '/mileage';
       }
@@ -119,7 +134,6 @@ export default function HomePage() {
   };
 
 const handleSelectZone = (zone) => {
-  console.log('handleSelectZone called with:', zone);
   if (zone === 'other') {
     setIsOtherZone(true);
     setSelectedZone('');
@@ -128,7 +142,6 @@ const handleSelectZone = (zone) => {
     setIsOtherZone(false);
     setOtherZone('');
   }
-  console.log('After setting zone - selectedZone:', zone, 'isOtherZone:', false);
 }
 
   if (isLoading) {
@@ -147,6 +160,10 @@ const handleSelectZone = (zone) => {
           Delivery Mileage Tracker
         </h1>
         
+        <div className='flex justify-center w-full'>
+        <UpdateMileageDialog needsOilChange={needsOilChange} />
+
+          </div>        
         <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
           <h2 className="text-base font-medium mb-3 text-text/80">
             {activeTrip ? 'Current Trip' : 'Start New Trip'}

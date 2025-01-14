@@ -5,9 +5,9 @@ const oilChangeSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    date: {
-        type: Date,
-        default: Date.now
+    currentlyNeeds: {
+        type: Boolean,
+        default: false
     },
     lastChange: {
         type: Date
