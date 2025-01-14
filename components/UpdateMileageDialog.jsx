@@ -75,7 +75,7 @@ const UpdateMileageDialog = ({ needsOilChange }) => {
         </DialogHeader>
 
         <p className="text-lg text-text/80">
-          Your vehicle has exceeded 3,000 miles since the last oil change.
+          Your vehicle has exceeded 5,000 miles since the last oil change.
           Please enter the new mileage after completing the oil change.
         </p>
         <p className="text-sm text-text/60">
