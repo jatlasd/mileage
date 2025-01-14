@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Clock, Edit2, X, Check } from "lucide-react";
 import TripBreaks from "./TripBreaks";
 import TripOrders from "./TripOrders";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 const TripTime = memo(function TripTime({ startTime, endTime, duration, totalBreakDuration }) {
   const netDuration = duration
@@ -44,6 +45,7 @@ const MileageEdit = memo(function MileageEdit({
   onSave,
   onCancel,
   onEdit,
+  onDelete,
   trip,
 }) {
   if (isEditing) {
@@ -92,9 +94,12 @@ const MileageEdit = memo(function MileageEdit({
       <div className="text-sm text-text/50 font-mono">
         {trip.startMileage} → {trip.endMileage || "..."}
       </div>
-      <button onClick={() => onEdit(trip)} className="p-1 hover:bg-white/10 rounded">
-        <Edit2 className="w-4 h-4 text-text/40" />
-      </button>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onEdit(trip)} className="p-1 hover:bg-white/10 rounded">
+          <Edit2 className="w-4 h-4 text-text/40" />
+        </button>
+        <DeleteConfirmDialog onConfirm={() => onDelete(trip._id)} />
+      </div>
     </>
   );
 });
@@ -107,6 +112,7 @@ const TripCard = memo(function TripCard({
   onSave,
   onCancel,
   onEditFormChange,
+  onDelete,
 }) {
   const startTime = new Date(trip.startDatetime);
   const endTime = trip.endDatetime ? new Date(trip.endDatetime) : null;
@@ -147,6 +153,7 @@ const TripCard = memo(function TripCard({
             onSave={onSave}
             onCancel={onCancel}
             onEdit={onEdit}
+            onDelete={onDelete}
             trip={trip}
           />
         </div>

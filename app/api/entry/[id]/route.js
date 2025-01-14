@@ -54,4 +54,25 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    await connectToDb();
+    const { id } = await params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid trip ID' }, { status: 400 });
+    }
+
+    const trip = await Trip.findByIdAndDelete(id);
+
+    if (!trip) {
+      return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 } 

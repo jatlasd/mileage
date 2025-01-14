@@ -113,6 +113,24 @@ export default function MileagePage() {
     }
   };
 
+  const handleDelete = async (tripId) => {
+    try {
+      const res = await fetch(`/api/entry/${tripId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete trip");
+      }
+
+      setTrips(trips.filter((trip) => trip._id !== tripId));
+    } catch (err) {
+      console.error("Error deleting trip:", err);
+      setError(err.message);
+    }
+  };
+
   const handleExportCSV = async ({ startDate, endDate }) => {
     try {
       const timestamp = new Date().getTime();
@@ -191,6 +209,7 @@ export default function MileagePage() {
                       onSave={handleSaveEdit}
                       onCancel={handleCancelEdit}
                       onEditFormChange={setEditForm}
+                      onDelete={handleDelete}
                     />
                   ))}
                 </div>

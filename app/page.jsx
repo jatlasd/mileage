@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { formatDuration } from '@/lib/utils';
 import { Pause, Play, Plus } from 'lucide-react';
 import OrderDialog from '@/components/OrderDialog';
+import { checkOil } from '@/lib/checkOil';
+
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
@@ -51,8 +53,6 @@ export default function HomePage() {
       activeTrip.zone : 
       (isOtherZone ? otherZone : selectedZone);
       
-    console.log('Submitting with zone:', zoneToSend, 'selectedZone:', selectedZone, 'isOtherZone:', isOtherZone, 'otherZone:', otherZone);
-
     try {
       const res = await fetch('/api/entry', {
         method: 'POST',
@@ -63,7 +63,6 @@ export default function HomePage() {
         }),
       });
       
-      console.log('Request body:', { mileage: Number(mileage), zone: zoneToSend });
       
       if (!res.ok) throw new Error('Failed to submit mileage');
       
@@ -75,7 +74,14 @@ export default function HomePage() {
       setIsOtherZone(false);
       
       if (!data.trip.isActive) {
-        window.location.href = '/mileage';
+        const needsOilChange = await checkOil(Number(mileage))
+
+        if(needsOilChange === true) {
+          console.log('need change')
+        } else {
+          console.log('no need change')
+        }
+        // window.location.href = '/mileage';
       }
     } catch (err) {
       console.error(err);
