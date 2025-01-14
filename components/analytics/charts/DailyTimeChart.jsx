@@ -58,7 +58,7 @@ export function DailyTimeChart({ data, isAllDays }) {
   const yAxisMax = Math.ceil(maxValue)
 
   return (
-    <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
+    <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <BarChart data={chartData}>
         <CartesianGrid vertical={false} className="stroke-muted" />
         <XAxis 

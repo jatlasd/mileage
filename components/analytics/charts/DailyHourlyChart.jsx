@@ -1,4 +1,4 @@
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 const chartConfig = {
@@ -27,27 +27,29 @@ export function DailyHourlyChart({ data }) {
   }
 
   return (
-    <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
-      <BarChart data={chartData}>
-        <CartesianGrid vertical={false} className="stroke-muted" />
-        <XAxis 
-          dataKey="time" 
-          tickLine={false}
-          axisLine={false}
-          className="text-muted-foreground"
-        />
-        <YAxis 
-          tickLine={false}
-          axisLine={false}
-          className="text-muted-foreground"
-        />
-        <ChartTooltip content={<ChartTooltipContent />} cursor={false} animationEasing="linear" animationDuration={200}/>
-        <Bar 
-          dataKey="total"
-          fill="hsl(var(--primary))"
-          radius={[4, 4, 0, 0]}
-        />
-      </BarChart>
+    <ChartContainer config={chartConfig} className="h-[300px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid vertical={false} className="stroke-muted" />
+          <XAxis 
+            dataKey="time" 
+            tickLine={false}
+            axisLine={false}
+            className="text-muted-foreground"
+          />
+          <YAxis 
+            tickLine={false}
+            axisLine={false}
+            className="text-muted-foreground"
+          />
+          <ChartTooltip content={<ChartTooltipContent />} cursor={false} animationEasing="linear" animationDuration={200}/>
+          <Bar 
+            dataKey="total"
+            fill="hsl(var(--primary))"
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </ChartContainer>
   )
 } 
