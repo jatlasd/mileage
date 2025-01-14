@@ -3,6 +3,7 @@ import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
 import { WeeklyPatternChart } from '../charts/WeeklyPatternChart'
 import { DailyHourlyChart } from '../charts/DailyHourlyChart'
+import { DailyTimeChart } from '../charts/DailyTimeChart'
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +18,7 @@ const DailyView = ({ selectedDay }) => {
   const [acceptanceRate, setAcceptanceRate] = useState(null)
   const [weeklyPattern, setWeeklyPattern] = useState(null)
   const [dailyHourlyData, setDailyHourlyData] = useState(null)
+  const [timeData, setTimeData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const dayMapping = {
@@ -74,7 +76,17 @@ const DailyView = ({ selectedDay }) => {
       }
     }
 
-    Promise.all([fetchDailyHourlyBreakdown(), fetchDailyStats()])
+    const fetchTimeData = async () => {
+      try {
+        const response = await fetch(`/api/analytics/daily/time?day=${dayMapping[selectedDay]}`)
+        const data = await response.json()
+        setTimeData(data)
+      } catch (error) {
+        console.error('Failed to fetch time data:', error)
+      }
+    }
+
+    Promise.all([fetchDailyHourlyBreakdown(), fetchDailyStats(), fetchTimeData()])
       .finally(() => setIsLoading(false))
   }, [selectedDay])
 
@@ -212,11 +224,15 @@ const DailyView = ({ selectedDay }) => {
         </ChartCard>
 
         <ChartCard
-          title="Day Performance"
-          subtitle="vs Previous Week"
+          title="Time Analysis"
+          subtitle="Trip Time & Total Time Out"
           height={300}
         >
-          {isLoading ? <LoadingChart height={300} /> : "Day-by-day comparison"}
+          {isLoading ? (
+            <LoadingChart height={300} />
+          ) : (
+            <DailyTimeChart data={timeData} isAllDays={selectedDay === 'all'} />
+          )}
         </ChartCard>
       </div>
 

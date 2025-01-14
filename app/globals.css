@@ -18,7 +18,7 @@ body {
     --accent-2: 35 35% 40%;
 
     --chart-1: var(--primary);
-    --chart-2: 213 90% 65%;
+    --chart-2: var(--accent-1);
     --chart-3: 262 83% 68%;
     --chart-4: 187 90% 65%;
     --chart-5: 150 83% 68%;
