@@ -20,7 +20,7 @@ export default function HomePage() {
   const [otherZone, setOtherZone] = useState('')
   const [needsOilChange, setNeedsOilChange] = useState(false)
 
-  const buttonClass = 'relative px-4 py-3 border-2 border-text/50 rounded-xl text-lg bg-text/10 w-full transition-all duration-200 active:scale-[0.98]'
+  const buttonClass = 'relative px-2 py-3 border-2 border-text/50 rounded-xl text-lg bg-text/10 w-full transition-all duration-200 active:scale-[0.98]'
   const selectedButtonClass = `${buttonClass} border-primary bg-primary/20 border-primary text-primary`
 
   useEffect(() => {
