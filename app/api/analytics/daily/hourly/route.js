@@ -27,7 +27,12 @@ export async function GET(request) {
             type: "$orders.type"
           },
           count: { $sum: 1 },
-          totalEarnings: { $sum: "$orders.total" },
+          accepted: {
+            $sum: { $cond: ["$orders.accepted", 1, 0] }
+          },
+          declined: {
+            $sum: { $cond: ["$orders.accepted", 0, 1] }
+          },
           uniqueDays: {
             $addToSet: {
               $dateToString: {
@@ -43,18 +48,15 @@ export async function GET(request) {
           hour: "$_id.hour",
           type: "$_id.type",
           count: 1,
-          averageEarnings: {
-            $round: [
-              { $divide: ["$totalEarnings", { $size: "$uniqueDays" }] },
-              2
-            ]
-          },
-          ordersPerDay: {
+          accepted: 1,
+          declined: 1,
+          average: {
             $round: [
               { $divide: ["$count", { $size: "$uniqueDays" }] },
               1
             ]
-          }
+          },
+          uniqueDayCount: { $size: "$uniqueDays" }
         }
       },
       { $sort: { hour: 1, type: 1 } }
@@ -65,18 +67,21 @@ export async function GET(request) {
       if (!hourlyStats[stat.hour]) {
         hourlyStats[stat.hour] = {
           total: 0,
-          averageEarnings: 0,
+          average: 0,
           types: {}
         }
       }
       
       hourlyStats[stat.hour].types[stat.type] = {
-        count: stat.ordersPerDay,
-        averageEarnings: stat.averageEarnings
+        count: stat.count,
+        average: stat.average,
+        accepted: stat.accepted,
+        declined: stat.declined,
+        uniqueDayCount: stat.uniqueDayCount
       }
       
-      hourlyStats[stat.hour].total += stat.ordersPerDay
-      hourlyStats[stat.hour].averageEarnings += stat.averageEarnings
+      hourlyStats[stat.hour].total += stat.count
+      hourlyStats[stat.hour].average += stat.average
     })
 
     return NextResponse.json({

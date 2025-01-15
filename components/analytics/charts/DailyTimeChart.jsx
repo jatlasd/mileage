@@ -4,11 +4,11 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 const chartConfig = {
   avgTripTime: {
     label: "Average Trip Time (hours)",
-    color: "hsl(var(--primary))"
+    color: "hsl(var(--chart-1))"
   },
   avgTimeOut: {
     label: "Average Time Out (hours)",
-    color: "hsl(var(--accent-1))"
+    color: "hsl(var(--chart-2))"
   }
 }
 
@@ -59,19 +59,26 @@ export function DailyTimeChart({ data, isAllDays }) {
 
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <BarChart data={chartData}>
-        <CartesianGrid vertical={false} className="stroke-muted" />
+      <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <CartesianGrid 
+          vertical={false} 
+          horizontal={true}
+          stroke="hsl(var(--grid-color))"
+          strokeDasharray="3 3"
+        />
         <XAxis 
           dataKey={isAllDays ? "day" : "displayDate"}
           tickLine={false}
           axisLine={false}
-          className="text-muted-foreground"
+          className="text-muted-foreground text-xs"
+          dy={8}
         />
         <YAxis 
           yAxisId="left"
           tickLine={false}
           axisLine={false}
-          className="text-muted-foreground"
+          className="text-muted-foreground text-xs"
+          dx={-8}
           domain={[0, yAxisMax]}
         />
         <YAxis 
@@ -79,25 +86,45 @@ export function DailyTimeChart({ data, isAllDays }) {
           orientation="right"
           tickLine={false}
           axisLine={false}
-          className="text-muted-foreground"
+          className="text-muted-foreground text-xs"
+          dx={8}
           domain={[0, yAxisMax]}
         />
-        <ChartTooltip content={<ChartTooltipContent />} cursor={false} animationEasing="linear" animationDuration={200}/>
+        <ChartTooltip 
+          content={<ChartTooltipContent />} 
+          cursor={false} 
+          animationEasing="ease-out" 
+          animationDuration={200}
+          contentStyle={{
+            background: "hsl(var(--tooltip-bg))",
+            border: "none",
+            borderRadius: "var(--radius)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+          }}
+        />
         <Bar 
           name="Avg Trip Time"
           dataKey="avgTripTime"
-          fill="hsl(var(--primary))"
+          fill="hsl(var(--chart-1))"
           radius={[4, 4, 0, 0]}
           yAxisId="left"
+          maxBarSize={50}
         />
         <Bar 
           name={isAllDays ? "Avg Time Out" : "Total Time Out"}
           dataKey={isAllDays ? "avgTimeOut" : "totalTimeOut"}
-          fill="hsl(var(--accent-1))"
+          fill="hsl(var(--chart-2))"
           radius={[4, 4, 0, 0]}
           yAxisId="right"
+          maxBarSize={50}
         />
-        <Legend verticalAlign="top" height={36}/>
+        <Legend 
+          verticalAlign="top" 
+          height={36}
+          className="text-sm"
+          iconSize={8}
+          iconType="circle"
+        />
       </BarChart>
     </ChartContainer>
   )

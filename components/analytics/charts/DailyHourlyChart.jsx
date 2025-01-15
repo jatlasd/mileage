@@ -4,7 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 const chartConfig = {
   total: {
     label: "Orders",
-    color: "hsl(var(--primary))"
+    color: "hsl(var(--chart-1))"
   }
 }
 
@@ -30,23 +30,42 @@ export function DailyHourlyChart({ data }) {
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <CartesianGrid vertical={false} className="stroke-muted" />
+          <CartesianGrid 
+            vertical={false} 
+            horizontal={true}
+            stroke="hsl(var(--grid-color))"
+            strokeDasharray="3 3"
+          />
           <XAxis 
             dataKey="time" 
             tickLine={false}
             axisLine={false}
-            className="text-muted-foreground"
+            className="text-muted-foreground text-xs"
+            dy={8}
           />
           <YAxis 
             tickLine={false}
             axisLine={false}
-            className="text-muted-foreground"
+            className="text-muted-foreground text-xs"
+            dx={-8}
           />
-          <ChartTooltip content={<ChartTooltipContent />} cursor={false} animationEasing="linear" animationDuration={200}/>
+          <ChartTooltip 
+            content={<ChartTooltipContent />} 
+            cursor={false} 
+            animationEasing="ease-out" 
+            animationDuration={200}
+            contentStyle={{
+              background: "hsl(var(--tooltip-bg))",
+              border: "none",
+              borderRadius: "var(--radius)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+            }}
+          />
           <Bar 
             dataKey="total"
-            fill="hsl(var(--primary))"
+            fill="hsl(var(--chart-1))"
             radius={[4, 4, 0, 0]}
+            maxBarSize={50}
           />
         </BarChart>
       </ResponsiveContainer>

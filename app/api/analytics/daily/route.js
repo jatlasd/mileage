@@ -132,6 +132,34 @@ export async function GET(request) {
       { $sort: { averageOrders: -1 }}
     ])
 
+    const typeStats = await Trip.aggregate([
+      { $match: matchStage },
+      { $unwind: "$orders" },
+      { $group: {
+        _id: "$orders.type",
+        totalOrders: { $sum: 1 },
+        uniqueDays: { $addToSet: { 
+          $dateToString: { 
+            format: "%Y-%m-%d", 
+            date: "$startDatetime" 
+          }
+        }}
+      }},
+      { $project: {
+        type: "$_id",
+        _id: 0,
+        totalOrders: 1,
+        uniqueDayCount: { $size: "$uniqueDays" },
+        averageOrders: {
+          $round: [
+            { $divide: ["$totalOrders", { $size: "$uniqueDays" }] },
+            1
+          ]
+        }
+      }},
+      { $sort: { totalOrders: -1 }}
+    ])
+
     let bestTimeData
     let busiestDay = null
     let acceptanceRate = null
@@ -166,7 +194,8 @@ export async function GET(request) {
         averageOrders: bestTimeData.averageOrders
       },
       busiestDay,
-      acceptanceRate
+      acceptanceRate,
+      typeStats
     })
   } catch (error) {
     return Response.json({ error: 'Failed to fetch analytics' }, { status: 500 })

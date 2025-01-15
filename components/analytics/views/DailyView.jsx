@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { DailyTypeChart } from '../charts/DailyTypeChart'
 
 const DailyView = ({ selectedDay }) => {
   const [dailyStats, setDailyStats] = useState(null)
@@ -20,6 +21,8 @@ const DailyView = ({ selectedDay }) => {
   const [dailyHourlyData, setDailyHourlyData] = useState(null)
   const [timeData, setTimeData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [typeData, setTypeData] = useState(null)
+  const [rawData, setRawData] = useState(null)
 
   const dayMapping = {
     'Mon': 'Monday',
@@ -50,6 +53,7 @@ const DailyView = ({ selectedDay }) => {
         setBestTime(data.bestTime)
         setBusiestDay(data.busiestDay)
         setAcceptanceRate(data.acceptanceRate)
+        setTypeData(data.typeStats)
         
         if (selectedDay === 'all') {
           const pattern = data.dailyStats.reduce((acc, stat) => {
@@ -70,6 +74,8 @@ const DailyView = ({ selectedDay }) => {
       try {
         const response = await fetch(`/api/analytics/daily/hourly?day=${dayMapping[selectedDay]}`)
         const data = await response.json()
+        setRawData(data)
+
         setDailyHourlyData(data.hourlyStats)
       } catch (error) {
         console.error('Failed to fetch daily hourly breakdown:', error)
@@ -236,6 +242,8 @@ const DailyView = ({ selectedDay }) => {
         </ChartCard>
       </div>
 
+      <button onClick={()=>rawData ? console.log(typeData) : console.log('not yet')}>click</button>
+
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <ChartCard title="Current Hour Stats" height={180}>
@@ -251,11 +259,12 @@ const DailyView = ({ selectedDay }) => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
-            title="Hourly Type Split"
+          title={`Average ${selectedDay === 'all' ? 'Weekly' : 'Daily'} Type Split`}
+            // title={selectedDay === 'all' ? "Average Weekly Type Split" : "Hourly Type Split"}
             subtitle="By hour of day"
             height={300}
           >
-            {isLoading ? <LoadingChart height={300} /> : "Order types by hour"}
+            {isLoading ? <LoadingChart height={300} /> : <DailyTypeChart typeStats={typeData}/>}
           </ChartCard>
           <ChartCard
             title="Earnings Distribution"

@@ -4,7 +4,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 const chartConfig = {
   orders: {
     label: "Orders",
-    color: "hsl(var(--primary))"
+    color: "hsl(var(--chart-1))"
   }
 }
 
@@ -21,25 +21,44 @@ export function WeeklyPatternChart({ data }) {
 
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <BarChart data={chartData}>
-        <CartesianGrid vertical={false} className="stroke-muted" />
+      <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+        <CartesianGrid 
+          vertical={false} 
+          horizontal={true}
+          stroke="hsl(var(--grid-color))"
+          strokeDasharray="3 3"
+        />
         <XAxis 
           dataKey="day" 
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => value.slice(0, 3)}
-          className="text-muted-foreground"
+          className="text-muted-foreground text-xs"
+          dy={8}
         />
         <YAxis 
           tickLine={false}
           axisLine={false}
-          className="text-muted-foreground"
+          className="text-muted-foreground text-xs"
+          dx={-8}
         />
-        <ChartTooltip content={<ChartTooltipContent />} cursor={false} animationEasing="linear" animationDuration={200}/>
+        <ChartTooltip 
+          content={<ChartTooltipContent />} 
+          cursor={false} 
+          animationEasing="ease-out" 
+          animationDuration={200}
+          contentStyle={{
+            background: "hsl(var(--tooltip-bg))",
+            border: "none",
+            borderRadius: "var(--radius)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+          }}
+        />
         <Bar 
           dataKey="orders"
-          fill="hsl(var(--primary))"
+          fill="hsl(var(--chart-1))"
           radius={[4, 4, 0, 0]}
+          maxBarSize={50}
         />
       </BarChart>
     </ChartContainer>

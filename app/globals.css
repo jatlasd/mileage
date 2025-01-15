@@ -18,17 +18,23 @@ body {
     --accent-2: 35 35% 40%;
 
     --chart-1: var(--primary);
-    --chart-2: var(--accent-1);
+    --chart-2: 348 77% 75%;
     --chart-3: 262 83% 68%;
     --chart-4: 187 90% 65%;
     --chart-5: 150 83% 68%;
+
+    --grid-color: 240 20% 25%;
+    --tooltip-bg: 240 25% 18%;
   }
 
   .dark {
     --chart-1: var(--primary);
-    --chart-2: 213 90% 65%;
+    --chart-2: 348 77% 75%;
     --chart-3: 262 83% 68%;
     --chart-4: 187 90% 65%;
     --chart-5: 150 83% 68%;
+
+    --grid-color: 240 20% 25%;
+    --tooltip-bg: 240 25% 18%;
   }
 }
