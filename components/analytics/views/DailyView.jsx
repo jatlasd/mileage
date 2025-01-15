@@ -36,11 +36,20 @@ const DailyView = ({ selectedDay }) => {
   }
 
   const formatDayDisplay = (day) => {
-    const reverseMapping = Object.entries(dayMapping).reduce((acc, [short, full]) => {
-      acc[full] = short
-      return acc
-    }, {})
+    const reverseMapping = {
+      'Monday': 'Mon',
+      'Tuesday': 'Tue',
+      'Wednesday': 'Wed',
+      'Thursday': 'Thu',
+      'Friday': 'Fri',
+      'Saturday': 'Sat',
+      'Sunday': 'Sun'
+    }
     return reverseMapping[day] || day
+  }
+
+  const getFullDayName = (shortDay) => {
+    return dayMapping[shortDay] || shortDay
   }
 
   useEffect(() => {
@@ -72,10 +81,10 @@ const DailyView = ({ selectedDay }) => {
 
     const fetchDailyHourlyBreakdown = async () => {
       try {
-        const response = await fetch(`/api/analytics/daily/hourly?day=${dayMapping[selectedDay]}`)
+        const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
+        const response = await fetch(`/api/analytics/daily/hourly?day=${fullDayName}`)
         const data = await response.json()
         setRawData(data)
-
         setDailyHourlyData(data.hourlyStats)
       } catch (error) {
         console.error('Failed to fetch daily hourly breakdown:', error)
@@ -84,7 +93,8 @@ const DailyView = ({ selectedDay }) => {
 
     const fetchTimeData = async () => {
       try {
-        const response = await fetch(`/api/analytics/daily/time?day=${dayMapping[selectedDay]}`)
+        const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
+        const response = await fetch(`/api/analytics/daily/time?day=${fullDayName}`)
         const data = await response.json()
         setTimeData(data)
       } catch (error) {
@@ -104,8 +114,21 @@ const DailyView = ({ selectedDay }) => {
       return totalAverage.toFixed(1)
     }
     
-    const dayStats = dailyStats.find(stat => stat.day === dayMapping[selectedDay])
+    const dayStats = dailyStats.find(stat => stat.day === getFullDayName(selectedDay))
     return dayStats ? dayStats.averageOrders.toString() : '0'
+  }
+
+  const getTotalCount = () => {
+    if (!timeData?.timeStats || timeData.timeStats.length === 0) return '0'
+    
+    if (selectedDay === 'all') {
+      return timeData.timeStats.reduce((sum, stat) => sum + (stat.tripCount || 0), 0).toString()
+    }
+    
+    const dayStats = timeData.timeStats
+    if (!dayStats || dayStats.length === 0) return '0'
+    
+    return dayStats.reduce((sum, stat) => sum + (stat.tripCount || 0), 0).toString()
   }
 
   const getBestTimeValue = () => {
@@ -117,7 +140,7 @@ const DailyView = ({ selectedDay }) => {
     if (selectedDay === 'all' && busiestDay) {
       return `Peak time (${formatDayDisplay(busiestDay.day)}s avg: ${busiestDay.averageOrders}/day)`
     }
-    return selectedDay === 'all' ? 'Overall peak' : `Peak on ${dayMapping[selectedDay]}s`
+    return selectedDay === 'all' ? 'Overall peak' : `Peak on ${getFullDayName(selectedDay)}s`
   }
 
   const getAcceptanceRateValue = () => {
@@ -126,7 +149,7 @@ const DailyView = ({ selectedDay }) => {
   }
 
   const getAcceptanceRateSubtitle = () => {
-    return selectedDay === 'all' ? 'Overall average' : `${dayMapping[selectedDay]}s only`
+    return selectedDay === 'all' ? 'Overall average' : `${getFullDayName(selectedDay)}s only`
   }
 
   const LoadingChart = ({ height }) => (
@@ -161,7 +184,23 @@ const DailyView = ({ selectedDay }) => {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
+      <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatCard
+                  title="Total Trips"
+                  value={isLoading ? "Loading..." : getTotalCount()}
+                  subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] p-4">
+            <p>The total number of trips you've completed. When viewing 'All Days', this shows your overall total. When a specific day is selected, it shows the total trips completed on that day of the week.</p>            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -242,7 +281,7 @@ const DailyView = ({ selectedDay }) => {
         </ChartCard>
       </div>
 
-      <button onClick={()=>rawData ? console.log(typeData) : console.log('not yet')}>click</button>
+      <button onClick={()=>rawData ? console.log(dailyStats) : console.log('not yet')}>click</button>
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -260,7 +299,6 @@ const DailyView = ({ selectedDay }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
           title={`Average ${selectedDay === 'all' ? 'Weekly' : 'Daily'} Type Split`}
-            // title={selectedDay === 'all' ? "Average Weekly Type Split" : "Hourly Type Split"}
             subtitle="By hour of day"
             height={300}
           >
