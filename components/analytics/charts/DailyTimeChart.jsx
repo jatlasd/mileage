@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Legend } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 const chartConfig = {
   avgTripTime: {
@@ -118,7 +118,7 @@ export function DailyTimeChart({ data, isAllDays }) {
           yAxisId="right"
           maxBarSize={50}
         />
-        <Legend 
+        <ChartLegend 
           verticalAlign="top" 
           height={36}
           className="text-sm"

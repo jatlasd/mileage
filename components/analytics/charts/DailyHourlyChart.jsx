@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 const chartConfig = {
   total: {
@@ -67,7 +67,7 @@ export function DailyHourlyChart({ data }) {
             radius={[4, 4, 0, 0]}
             maxBarSize={50}
           />
-                  <Legend 
+                  <ChartLegend 
           verticalAlign="top" 
           height={36}
           className="text-sm"
