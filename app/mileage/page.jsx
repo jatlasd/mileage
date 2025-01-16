@@ -166,113 +166,115 @@ export default function MileagePage() {
 
   return (
     <div className="min-h-[100dvh] bg-background text-text flex flex-col">
-      <MileageStats stats={stats} />
+      <div className="container mx-auto max-w-7xl">
+        <MileageStats stats={stats} />
 
-      <div className="flex-1 p-5 space-y-3">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Mileage Log</h1>
-          <ExportDialog onExport={handleExportCSV} />
+        <div className="flex-1 p-5 space-y-3">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Mileage Log</h1>
+            <ExportDialog onExport={handleExportCSV} />
+          </div>
+
+          <FilterBar
+            filterPeriod={filterPeriod}
+            filterYear={filterYear}
+            totalItems={totalItems}
+            onFilterPeriodChange={setFilterPeriod}
+            onFilterYearChange={setFilterYear}
+          />
+
+          {trips.length === 0 ? (
+            <div className="text-center text-text/40 py-8">
+              No trips recorded yet
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {paginatedTrips.map(([dateKey, dayTrips]) => (
+                <div key={dateKey} className="space-y-3">
+                  <div className="flex items-baseline justify-between">
+                    <h3 className="text-sm font-medium text-text/80">
+                      {formatDayHeader(dateKey)}
+                    </h3>
+                    <span className="text-xs text-text/40 font-mono">
+                      {getDayTotal(dayTrips).toFixed(1)} mi
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {dayTrips.map((trip) => (
+                      <TripCard
+                        key={trip._id}
+                        trip={trip}
+                        editingTrip={editingTrip}
+                        editForm={editForm}
+                        onEdit={handleEdit}
+                        onSave={handleSaveEdit}
+                        onCancel={handleCancelEdit}
+                        onEditFormChange={setEditForm}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination>
+                    <PaginationContent className="gap-2">
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(1, prev - 1))
+                          }
+                          className={`${
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          } 
+                            bg-[#1a1b26] border border-white/[0.1] hover:bg-[#1f2133] transition-colors`}
+                        />
+                      </PaginationItem>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className={`${
+                                currentPage === page
+                                  ? "bg-primary/20 text-primary border-primary/20"
+                                  : "bg-[#1a1b26] border-white/[0.1] hover:bg-[#1f2133]"
+                              } cursor-pointer border transition-colors`}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(totalPages, prev + 1)
+                            )
+                          }
+                          className={`${
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                            bg-[#1a1b26] border border-white/[0.1] hover:bg-[#1f2133] transition-colors`}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-
-        <FilterBar
-          filterPeriod={filterPeriod}
-          filterYear={filterYear}
-          totalItems={totalItems}
-          onFilterPeriodChange={setFilterPeriod}
-          onFilterYearChange={setFilterYear}
-        />
-
-        {trips.length === 0 ? (
-          <div className="text-center text-text/40 py-8">
-            No trips recorded yet
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {paginatedTrips.map(([dateKey, dayTrips]) => (
-              <div key={dateKey} className="space-y-3">
-                <div className="flex items-baseline justify-between">
-                  <h3 className="text-sm font-medium text-text/80">
-                    {formatDayHeader(dateKey)}
-                  </h3>
-                  <span className="text-xs text-text/40 font-mono">
-                    {getDayTotal(dayTrips).toFixed(1)} mi
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {dayTrips.map((trip) => (
-                    <TripCard
-                      key={trip._id}
-                      trip={trip}
-                      editingTrip={editingTrip}
-                      editForm={editForm}
-                      onEdit={handleEdit}
-                      onSave={handleSaveEdit}
-                      onCancel={handleCancelEdit}
-                      onEditFormChange={setEditForm}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            {totalPages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <Pagination>
-                  <PaginationContent className="gap-2">
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(1, prev - 1))
-                        }
-                        className={`${
-                          currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        } 
-                          bg-[#1a1b26] border border-white/[0.1] hover:bg-[#1f2133] transition-colors`}
-                      />
-                    </PaginationItem>
-
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className={`${
-                              currentPage === page
-                                ? "bg-primary/20 text-primary border-primary/20"
-                                : "bg-[#1a1b26] border-white/[0.1] hover:bg-[#1f2133]"
-                            } cursor-pointer border transition-colors`}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    )}
-
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(totalPages, prev + 1)
-                          )
-                        }
-                        className={`${
-                          currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        }
-                          bg-[#1a1b26] border border-white/[0.1] hover:bg-[#1f2133] transition-colors`}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

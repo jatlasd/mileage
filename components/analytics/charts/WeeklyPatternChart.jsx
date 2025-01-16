@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartLegend, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 const chartConfig = {
   orders: {
@@ -59,6 +59,13 @@ export function WeeklyPatternChart({ data }) {
           fill="hsl(var(--chart-1))"
           radius={[4, 4, 0, 0]}
           maxBarSize={50}
+        />
+                <ChartLegend 
+          verticalAlign="top" 
+          height={36}
+          className="text-sm"
+          iconSize={8}
+          iconType="circle"
         />
       </BarChart>
     </ChartContainer>

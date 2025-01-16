@@ -37,29 +37,35 @@ const AnalyticsContainer = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-4">
-        <FilterGroup
-          title="Time Period"
-          value={timeFilter}
-          onChange={setTimeFilter}
-          options={timeOptions}
-        />
+      <div className="flex items-start gap-4">
+        <div className="flex-none">
+          <FilterGroup
+            title="Time Period"
+            value={timeFilter}
+            onChange={setTimeFilter}
+            options={timeOptions}
+          />
+        </div>
 
         {timeFilter === 'daily' && (
-          <FilterGroup
-            title="Day Filter"
-            value={selectedDay}
-            onChange={setSelectedDay}
-            options={dayOptions}
-          />
+          <div className="flex-none">
+            <FilterGroup
+              title="Day Filter"
+              value={selectedDay}
+              onChange={setSelectedDay}
+              options={dayOptions}
+            />
+          </div>
         )}
 
-        <FilterGroup
-          title="Zones"
-          value={zoneFilter}
-          onChange={setZoneFilter}
-          options={zoneOptions}
-        />
+        <div className="flex-none">
+          <FilterGroup
+            title="Zones"
+            value={zoneFilter}
+            onChange={setZoneFilter}
+            options={zoneOptions}
+          />
+        </div>
       </div>
 
       {timeFilter === 'hourly' && <HourlyView />}

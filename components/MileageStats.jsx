@@ -14,8 +14,12 @@ const MileageStats = memo(function MileageStats({ stats }) {
     .toLocaleString("default", { month: "short" })
     .toUpperCase();
 
+    const calculateWriteoff = () => {
+      return stats.ytd * 0.7
+    }
+
   return (
-    <div className="bg-white/[0.07] border-b border-white/[0.05]">
+    <div className="bg-white/[0.07] border-b border-white/[0.05] rounded-xl mt-10">
       <div className="p-5 space-y-4">
         <div className="flex items-baseline gap-3">
           <span className="text-sm font-medium text-text/60">TODAY</span>
@@ -29,7 +33,7 @@ const MileageStats = memo(function MileageStats({ stats }) {
           <StatBox label="YTD" value={stats.ytd} />
           <StatBox label={currentMonth} value={stats.month} />
           <StatBox label="WEEK" value={stats.week} />
-          <StatBox label="AVG" value={stats.average} />
+          <StatBox label="TAX" value={calculateWriteoff()} />
         </div>
       </div>
     </div>

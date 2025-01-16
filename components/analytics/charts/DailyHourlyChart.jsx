@@ -67,6 +67,13 @@ export function DailyHourlyChart({ data }) {
             radius={[4, 4, 0, 0]}
             maxBarSize={50}
           />
+                  <Legend 
+          verticalAlign="top" 
+          height={36}
+          className="text-sm"
+          iconSize={8}
+          iconType="circle"
+        />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
