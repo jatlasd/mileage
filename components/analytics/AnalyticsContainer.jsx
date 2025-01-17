@@ -37,8 +37,8 @@ const AnalyticsContainer = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start gap-4">
-        <div className="flex-none">
+      <div className="flex gap-4">
+        <div className="">
           <FilterGroup
             title="Time Period"
             value={timeFilter}
@@ -48,7 +48,7 @@ const AnalyticsContainer = () => {
         </div>
 
         {timeFilter === 'daily' && (
-          <div className="flex-none">
+          <div className="">
             <FilterGroup
               title="Day Filter"
               value={selectedDay}
@@ -58,7 +58,7 @@ const AnalyticsContainer = () => {
           </div>
         )}
 
-        <div className="flex-none">
+        <div className="">
           <FilterGroup
             title="Zones"
             value={zoneFilter}

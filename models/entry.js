@@ -31,8 +31,8 @@ const TripSchema = new mongoose.Schema({
 
 TripSchema.pre('save', function(next) {
   if (this.startDatetime) {
-    this.month = this.startDatetime.toLocaleString('en-US', { month: 'long' });
-    this.dayOfWeek = this.startDatetime.toLocaleString('en-US', { weekday: 'long' });
+    this.month = this.startDatetime.toLocaleString('en-US', { month: 'long', timeZone: 'America/New_York' });
+    this.dayOfWeek = this.startDatetime.toLocaleString('en-US', { weekday: 'long', timeZone: 'America/New_York' });
   }
   next();
 });

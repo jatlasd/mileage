@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload }) => {
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.fill }} />
             <span className="font-medium text-lg">{data.percentage}%</span>
-            <span className="text-gray-500 text-sm">of total orders</span>
+            <span className="text-gray-500 text-sm">of average daily orders</span>
           </div>
         </div>
       </div>

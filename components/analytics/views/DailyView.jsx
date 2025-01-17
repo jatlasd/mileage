@@ -4,13 +4,28 @@ import ChartCard from '../ChartCard'
 import { WeeklyPatternChart } from '../charts/WeeklyPatternChart'
 import { DailyHourlyChart } from '../charts/DailyHourlyChart'
 import { DailyTimeChart } from '../charts/DailyTimeChart'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { DailyTypeChart } from '../charts/DailyTypeChart'
+import LoadingChart from '../LoadingChart'
+import StatTooltip from '../StatTooltip'
+import {
+  dayMapping,
+  formatDayDisplay,
+  getFullDayName,
+  calculateDailyAverage,
+  calculateTotalCount,
+  formatBestTimeValue,
+  getBestTimeSubtitle,
+  formatAcceptanceRate,
+  getAcceptanceRateSubtitle
+} from '@/lib/helpers/dailyStats'
+import {
+  fetchMostRecentTrip,
+  fetchDailyStats,
+  fetchDailyHourlyBreakdown,
+  fetchTimeData
+} from '@/lib/api/dailyAnalytics'
+import { Button } from '@/components/ui/button'
+import MostRecentTrip from '../MostRecentTrip'
 
 const DailyView = ({ selectedDay }) => {
   const [dailyStats, setDailyStats] = useState(null)
@@ -22,235 +37,92 @@ const DailyView = ({ selectedDay }) => {
   const [timeData, setTimeData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [typeData, setTypeData] = useState(null)
-  const [rawData, setRawData] = useState(null)
-
-  const dayMapping = {
-    'Mon': 'Monday',
-    'Tue': 'Tuesday',
-    'Wed': 'Wednesday',
-    'Thu': 'Thursday',
-    'Fri': 'Friday',
-    'Sat': 'Saturday',
-    'Sun': 'Sunday',
-    'all': 'all'
-  }
-
-  const formatDayDisplay = (day) => {
-    const reverseMapping = {
-      'Monday': 'Mon',
-      'Tuesday': 'Tue',
-      'Wednesday': 'Wed',
-      'Thursday': 'Thu',
-      'Friday': 'Fri',
-      'Saturday': 'Sat',
-      'Sunday': 'Sun'
-    }
-    return reverseMapping[day] || day
-  }
-
-  const getFullDayName = (shortDay) => {
-    return dayMapping[shortDay] || shortDay
-  }
+  const [mostRecent, setMostRecent] = useState(null)
 
   useEffect(() => {
     setIsLoading(true)
-    const fetchDailyStats = async () => {
-      try {
-        const response = await fetch(`/api/analytics/daily?day=${selectedDay}`)
-        const data = await response.json()
-        setDailyStats(data.dailyStats)
-        setBestTime(data.bestTime)
-        setBusiestDay(data.busiestDay)
-        setAcceptanceRate(data.acceptanceRate)
-        setTypeData(data.typeStats)
+
+    const loadData = async () => {
+      const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
+      
+      const [recentTrip, hourlyData, statsData, time] = await Promise.all([
+        fetchMostRecentTrip(selectedDay, dayMapping),
+        fetchDailyHourlyBreakdown(fullDayName),
+        fetchDailyStats(selectedDay),
+        fetchTimeData(fullDayName)
+      ])
+
+      setMostRecent(recentTrip)
+      setDailyHourlyData(hourlyData)
+      setTimeData(time)
+
+      if (statsData) {
+        setDailyStats(statsData.dailyStats)
+        setBestTime(statsData.bestTime)
+        setBusiestDay(statsData.busiestDay)
+        setAcceptanceRate(statsData.acceptanceRate)
+        setTypeData(statsData.typeStats)
         
         if (selectedDay === 'all') {
-          const pattern = data.dailyStats.reduce((acc, stat) => {
+          const pattern = statsData.dailyStats.reduce((acc, stat) => {
             const shortDay = formatDayDisplay(stat.day)
             acc[shortDay] = stat
             return acc
           }, {})
           setWeeklyPattern(pattern)
         } else {
-          setWeeklyPattern(data.weeklyPattern)
+          setWeeklyPattern(statsData.weeklyPattern)
         }
-      } catch (error) {
-        console.error('Failed to fetch daily stats:', error)
       }
+
+      setIsLoading(false)
     }
 
-    const fetchDailyHourlyBreakdown = async () => {
-      try {
-        const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
-        const response = await fetch(`/api/analytics/daily/hourly?day=${fullDayName}`)
-        const data = await response.json()
-        setRawData(data)
-        setDailyHourlyData(data.hourlyStats)
-      } catch (error) {
-        console.error('Failed to fetch daily hourly breakdown:', error)
-      }
-    }
-
-    const fetchTimeData = async () => {
-      try {
-        const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
-        const response = await fetch(`/api/analytics/daily/time?day=${fullDayName}`)
-        const data = await response.json()
-        setTimeData(data)
-      } catch (error) {
-        console.error('Failed to fetch time data:', error)
-      }
-    }
-
-    Promise.all([fetchDailyHourlyBreakdown(), fetchDailyStats(), fetchTimeData()])
-      .finally(() => setIsLoading(false))
+    loadData()
   }, [selectedDay])
-
-  const getDailyAverage = () => {
-    if (!dailyStats) return '0'
-    
-    if (selectedDay === 'all') {
-      const totalAverage = dailyStats.reduce((sum, stat) => sum + stat.averageOrders, 0) / dailyStats.length
-      return totalAverage.toFixed(1)
-    }
-    
-    const dayStats = dailyStats.find(stat => stat.day === getFullDayName(selectedDay))
-    return dayStats ? dayStats.averageOrders.toString() : '0'
-  }
-
-  const getTotalCount = () => {
-    if (!timeData?.timeStats || timeData.timeStats.length === 0) return '0'
-    
-    if (selectedDay === 'all') {
-      return timeData.timeStats.reduce((sum, stat) => sum + (stat.tripCount || 0), 0).toString()
-    }
-    
-    const dayStats = timeData.timeStats
-    if (!dayStats || dayStats.length === 0) return '0'
-    
-    return dayStats.reduce((sum, stat) => sum + (stat.tripCount || 0), 0).toString()
-  }
-
-  const getBestTimeValue = () => {
-    if (!bestTime) return 'Loading...'
-    return bestTime.hour === 'No data' ? 'No data' : `${bestTime.hour} (${bestTime.averageOrders}/hr)`
-  }
-
-  const getBestTimeSubtitle = () => {
-    if (selectedDay === 'all' && busiestDay) {
-      return `Peak time (${formatDayDisplay(busiestDay.day)}s avg: ${busiestDay.averageOrders}/day)`
-    }
-    return selectedDay === 'all' ? 'Overall peak' : `Peak on ${getFullDayName(selectedDay)}s`
-  }
-
-  const getAcceptanceRateValue = () => {
-    if (acceptanceRate === null) return '0%'
-    return `${acceptanceRate}%`
-  }
-
-  const getAcceptanceRateSubtitle = () => {
-    return selectedDay === 'all' ? 'Overall average' : `${getFullDayName(selectedDay)}s only`
-  }
-
-  const LoadingChart = ({ height }) => (
-    <div 
-      className="flex items-center justify-center animate-pulse" 
-      style={{ height: `${height}px` }}
-    >
-      <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-        <svg 
-          className="animate-spin h-8 w-8 text-primary" 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24"
-        >
-          <circle 
-            className="opacity-25" 
-            cx="12" 
-            cy="12" 
-            r="10" 
-            stroke="currentColor" 
-            strokeWidth="4"
-          />
-          <path 
-            className="opacity-75" 
-            fill="currentColor" 
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
-      </div>
-    </div>
-  )
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <StatCard
-                  title="Total Trips"
-                  value={isLoading ? "Loading..." : getTotalCount()}
-                  subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] p-4">
-            <p>The total number of trips you've completed. When viewing 'All Days', this shows your overall total. When a specific day is selected, it shows the total trips completed on that day of the week.</p>            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <StatTooltip content="The total number of trips you've completed. When viewing 'All Days', this shows your overall total. When a specific day is selected, it shows the total trips completed on that day of the week.">
+          <div>
+            <StatCard
+              title="Total Trips"
+              value={isLoading ? "Loading..." : calculateTotalCount(timeData, selectedDay)}
+              subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
+            />
+          </div>
+        </StatTooltip>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <StatCard
-                  title="Daily Average"
-                  value={isLoading ? "Loading..." : getDailyAverage()}
-                  subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] p-4">
-              <p>The average number of orders you get per day. When viewing 'All Days', this shows your overall average. When a specific day is selected, it shows that day's typical performance.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <StatTooltip content="The average number of orders you get per day. When viewing 'All Days', this shows your overall average. When a specific day is selected, it shows that day's typical performance.">
+          <div>
+            <StatCard
+              title="Daily Average"
+              value={isLoading ? "Loading..." : calculateDailyAverage(dailyStats, selectedDay)}
+              subtitle={selectedDay === 'all' ? 'All days' : `${dayMapping[selectedDay]}s only`}
+            />
+          </div>
+        </StatTooltip>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <StatCard
-                  title="Best Time"
-                  value={isLoading ? "Loading..." : getBestTimeValue()}
-                  subtitle={getBestTimeSubtitle()}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] p-4">
-              <p>The busiest hour of the day for orders. When viewing 'All Days', it also shows which day of the week is typically busiest. This helps you plan the best times to schedule yourself.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <StatTooltip content="The busiest hour of the day for orders. When viewing 'All Days', it also shows which day of the week is typically busiest. This helps you plan the best times to schedule yourself.">
+          <div>
+            <StatCard
+              title="Best Time"
+              value={isLoading ? "Loading..." : formatBestTimeValue(bestTime)}
+              subtitle={getBestTimeSubtitle(selectedDay, busiestDay)}
+            />
+          </div>
+        </StatTooltip>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <StatCard
-                  title="Acceptance Rate"
-                  value={isLoading ? "Loading..." : getAcceptanceRateValue()}
-                  subtitle={getAcceptanceRateSubtitle()}
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] p-4">
-              <p>The percentage of orders you accept. A higher rate on certain days might mean better quality orders, while a lower rate might indicate more low-value orders to skip.</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <StatTooltip content="The percentage of orders you accept. A higher rate on certain days might mean better quality orders, while a lower rate might indicate more low-value orders to skip.">
+          <div>
+            <StatCard
+              title="Acceptance Rate"
+              value={isLoading ? "Loading..." : formatAcceptanceRate(acceptanceRate)}
+              subtitle={getAcceptanceRateSubtitle(selectedDay)}
+            />
+          </div>
+        </StatTooltip>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -281,24 +153,17 @@ const DailyView = ({ selectedDay }) => {
         </ChartCard>
       </div>
 
-      <button onClick={()=>rawData ? console.log(dailyStats) : console.log('not yet')}>click</button>
-
       <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ChartCard title="Current Hour Stats" height={180}>
-            {isLoading ? <LoadingChart height={180} /> : "Current hour stats"}
-          </ChartCard>
-          <ChartCard title="Peak Hours" height={180}>
-            {isLoading ? <LoadingChart height={180} /> : "Peak hours distribution"}
-          </ChartCard>
-          <ChartCard title="Acceptance Rates" height={180}>
-            {isLoading ? <LoadingChart height={180} /> : "Hourly acceptance rates"}
-          </ChartCard>
-        </div>
+        <h1 className="text-5xl text-primary font-bold">Most Recent</h1>
+        <Button className="bg-primary" onClick={()=>{mostRecent?console.log(mostRecent):console.log('notyet')}}>Click</Button>
+        {isLoading?<p>loading...</p>:
+        
+          <MostRecentTrip trip={mostRecent}/>
+        }
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
-          title={`Average ${selectedDay === 'all' ? 'Weekly' : 'Daily'} Type Split`}
+            title={`Average ${selectedDay === 'all' ? 'Weekly' : 'Daily'} Type Split`}
             subtitle="By hour of day"
             height={300}
           >

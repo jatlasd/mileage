@@ -1,58 +1,40 @@
 "use client"
 
+import React from 'react'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
 
 const Testing = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [trips, setTrips] = useState(null)
-  const [filteredByYearTrips, setFilteredByYearTrips] = useState(null)
-  const [totalMiles, setTotalMiles] = useState(null)
-  const [writeoff, setWriteoff] = useState(null)
-  
-
-  useEffect(() => {
-    const fetchTrips = async () => {
-      setIsLoading(true)
+  const updateDayOfWeek = async () => {
+    try {
       const response = await fetch('/api/entry')
       const trips = await response.json()
-      setTrips(trips)
-      setIsLoading(false)
+
+      for (const trip of trips) {
+        if (trip.startDatetime) {
+          const startDate = new Date(trip.startDatetime)
+          const dayOfWeek = startDate.toLocaleString('en-US', { weekday: 'long', timeZone: 'America/New_York' })
+
+          await fetch(`/api/entry/${trip._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ dayOfWeek }),
+          })
+        }
+      }
+
+      alert('Successfully updated dayOfWeek for all trips')
+    } catch (error) {
+      console.error('Error updating trips:', error)
+      alert('Error updating trips. Check console for details.')
     }
-    fetchTrips()
-  }, [])
-
-  const filterByYear = () => {
-    const trips2025 = trips.filter(trip => {
-      const tripDate = new Date(trip.startDatetime)
-      return tripDate.getFullYear() === 2025
-    })
-    setFilteredByYearTrips(trips2025)
   }
-
-  const calculateTotalMiles = () => {
-    const total = filteredByYearTrips.reduce((acc, trip) => acc + trip.tripMiles, 0)
-    setTotalMiles(total.toFixed(2))
-  }
-
-  const calculateWriteoff = () => {
-    const writeoffAmount = totalMiles * 0.66
-    setWriteoff(writeoffAmount.toFixed(2))
-  }
-
-
-
-  if(isLoading) return <p>Loading...</p>
 
   return (
-    <div className='h-screen w-screen flex flex-col items-center justify-center gap-5 bg-background/20'>
-      <Button onClick={()=>console.log(trips)}>Log all orders</Button>
-      <Button onClick={filterByYear}>Filter them!</Button>
-      <Button onClick={()=>console.log(filteredByYearTrips)}>Log filtered orders</Button>
-      <Button onClick={calculateTotalMiles}>Calculate total miles</Button>
-      <Button onClick={()=>console.log(totalMiles)}>Log total miles</Button>
-      <Button onClick={calculateWriteoff}>Calculate writeoff</Button>
-      <Button onClick={()=>console.log(writeoff)}>Log writeoff</Button>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Testing Page</h1>
+      <Button onClick={updateDayOfWeek}>Update Day of Week for All Trips</Button>
     </div>
   )
 }

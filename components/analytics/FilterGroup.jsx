@@ -24,7 +24,7 @@ const FilterGroup = ({ title, value, onChange, options }) => {
           </SelectContent>
         </Select>
       </div>
-      <div className="hidden md:flex gap-2">
+      <div className="hidden md:flex md:flex-wrap gap-2">
         {options.map((option) => (
           <FilterButton
             key={option.value}
