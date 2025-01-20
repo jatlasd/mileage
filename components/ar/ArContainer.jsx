@@ -10,6 +10,7 @@ const ArContainer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [sortNewestFirst, setSortNewestFirst] = useState(true);
   const [ordersSinceLastDecline, setOrdersSinceLastDecline] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -87,7 +88,14 @@ const ArContainer = () => {
         </div>
         <div className="hidden container mx-auto max-w-7xl md:grid md:grid-cols-5 lg:grid-cols-10 gap-4 px-6 md:px-10 pb-10">
             {sortedOrders.map((order, i) => (
-                <OrderHoverCard key={i} order={order} index={i} />
+                <OrderHoverCard 
+                    key={i} 
+                    order={order} 
+                    index={i} 
+                    isHovered={hoveredIndex === i}
+                    anyHovered={hoveredIndex !== null}
+                    onHover={(isHovering) => setHoveredIndex(isHovering ? i : null)}
+                />
             ))}
         </div>
     </div>

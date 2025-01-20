@@ -5,7 +5,7 @@ import {
   } from "@/components/ui/hover-card"
   
 
-const OrderHoverCard = ({ order, index}) => {
+const OrderHoverCard = ({ order, index, isHovered, anyHovered, onHover }) => {
   const date = new Date(order.time)
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -18,11 +18,18 @@ const OrderHoverCard = ({ order, index}) => {
     hour12: true
   })
 
+  const getBackgroundColor = () => {
+    if (!anyHovered || isHovered) {
+      return order.accepted ? 'bg-green-700/65 hover:bg-green-700/80' : 'bg-primary/75 hover:bg-primary/85'
+    }
+    return order.accepted ? 'bg-green-700/20' : 'bg-primary/20'
+  }
+
   return (
-    <HoverCard>
+    <HoverCard onOpenChange={onHover} openDelay={150} closeDelay={150}>
         <HoverCardTrigger>
-          <div className={`flex items-center justify-center rounded-lg h-10 text-sm font-medium transition-colors ${order.accepted ? 'bg-green-700/65 hover:bg-green-700/80' : 'bg-primary/75 hover:bg-primary/85'}`}>
-            <span className="text-gray-900">{index + 1}.</span>
+          <div className={`flex items-center justify-center rounded-lg h-10 text-sm font-medium transition-colors ${getBackgroundColor()}`}>
+            <span className={`${anyHovered && !isHovered ? 'text-gray-900/50' : 'text-gray-900'}`}>{index + 1}.</span>
           </div>
         </HoverCardTrigger>
       <HoverCardContent className="w-64 bg-surface border border-text/10 text-text/85">
