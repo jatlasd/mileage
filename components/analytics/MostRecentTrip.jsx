@@ -107,7 +107,7 @@ const MostRecentTrip = ({ trip }) => {
             <CardHeader className="pb-2">
                 <CardTitle className="text-xl font-medium text-white/90 text-center border-b border-white/10 pb-2">Busiest Hour</CardTitle>
             </CardHeader>
-            <CardContent className="flex-2 flex items-center justify-center min-h-[180px]">
+            <CardContent className="flex-1 flex items-center justify-center min-h-[180px]">
                 <h1 className='font-bold text-3xl text-primary'>{getMostPopularHourBlock()}</h1>
             </CardContent>
         </Card>
