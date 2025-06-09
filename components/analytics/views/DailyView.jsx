@@ -155,7 +155,6 @@ const DailyView = ({ selectedDay }) => {
 
       <div className="space-y-6">
         <h1 className="text-5xl text-primary font-bold">Most Recent</h1>
-        <Button className="bg-primary" onClick={()=>{mostRecent?console.log(mostRecent):console.log('notyet')}}>Click</Button>
         {isLoading?<p>loading...</p>:
         
           <MostRecentTrip trip={mostRecent}/>

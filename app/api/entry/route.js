@@ -3,13 +3,9 @@ import Trip from '@/models/entry';
 
 export const GET = async () => {
   try {
-    console.log('Connecting to database...');
     await connectToDb();
-    console.log('Connected successfully');
     
-    console.log('Fetching trips...');
     const trips = await Trip.find({}).sort({ startDatetime: -1 }).lean();
-    console.log(`Found ${trips.length} trips`);
     
     return new Response(JSON.stringify(trips), { 
       status: 200,

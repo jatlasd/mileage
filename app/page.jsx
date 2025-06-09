@@ -36,7 +36,17 @@ export default function HomePage() {
         setIsLoading(false);
       }
     };
+    
+    const logVisit = async () => {
+      try {
+        await fetch('/api/logs', { method: 'POST' });
+      } catch (err) {
+        // Silent fail
+      }
+    };
+    
     checkActiveTrip();
+    logVisit();
   }, []);
 
   useEffect(() => {

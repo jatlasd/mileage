@@ -17,7 +17,6 @@ const Testing = () => {
         .sort((a, b) => new Date(b.time) - new Date(a.time))
         .slice(0, 100)
       
-      console.log('100 Most Recent Orders:', sortedOrders)
       setOrders(sortedOrders)
     } catch (error) {
       console.error('Error fetching orders:', error)
