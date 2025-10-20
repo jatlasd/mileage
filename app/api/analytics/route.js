@@ -1,4 +1,4 @@
-// app/api/analytics/route.js
+// Simple hourly stats for a specific day (legacy endpoint)
 import { connectToDb } from '@/lib/mongodb'
 import Trip from '@/models/entry'
 
@@ -12,30 +12,36 @@ export async function GET(request) {
     }
 
     await connectToDb();
-    
+
     const hourlyStats = await Trip.aggregate([
-      { $match: { 
-        dayOfWeek: day,
-        "orders.0": { $exists: true }
-      }},
-      { $unwind: "$orders" },
-      { $group: {
-        _id: "$orders.hourBlock",
-        totalOrders: { $sum: 1 },
-        uniqueDays: { $addToSet: "$_id" }
-      }},
-      { $project: {
-        hourBlock: "$_id",
-        _id: 0,
-        totalOrders: 1,
-        uniqueDayCount: { $size: "$uniqueDays" },
-        averageOrders: {
-          $round: [
-            { $divide: ["$totalOrders", { $size: "$uniqueDays" }] },
-            2
-          ]
+      {
+        $match: {
+          dayOfWeek: day,
+          "orders.0": { $exists: true }
         }
-      }},
+      },
+      { $unwind: "$orders" },
+      {
+        $group: {
+          _id: "$orders.hourBlock",
+          totalOrders: { $sum: 1 },
+          uniqueDays: { $addToSet: "$_id" }
+        }
+      },
+      {
+        $project: {
+          hourBlock: "$_id",
+          _id: 0,
+          totalOrders: 1,
+          uniqueDayCount: { $size: "$uniqueDays" },
+          averageOrders: {
+            $round: [
+              { $divide: ["$totalOrders", { $size: "$uniqueDays" }] },
+              2
+            ]
+          }
+        }
+      },
       { $sort: { hourBlock: 1 }}
     ]);
 

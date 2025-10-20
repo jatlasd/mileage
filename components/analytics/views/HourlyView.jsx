@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
 import {
@@ -7,23 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useHourlyAnalytics } from '@/lib/hooks/useAnalytics'
 
 const HourlyView = () => {
-  const [hourlyStats, setHourlyStats] = useState(null)
-
-  useEffect(() => {
-    const fetchHourlyStats = async () => {
-      try {
-        const response = await fetch('/api/analytics/hourly')
-        const data = await response.json()
-        setHourlyStats(data)
-      } catch (error) {
-        console.error('Failed to fetch hourly stats:', error)
-      }
-    }
-
-    fetchHourlyStats()
-  }, [])
+  const { data: hourlyStats, isLoading } = useHourlyAnalytics()
 
   const getSelectedHourValue = () => {
     if (!hourlyStats?.selectedHour) return '0/hr'

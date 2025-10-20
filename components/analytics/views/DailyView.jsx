@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
 import { WeeklyPatternChart } from '../charts/WeeklyPatternChart'
@@ -10,7 +9,6 @@ import StatTooltip from '../StatTooltip'
 import {
   dayMapping,
   formatDayDisplay,
-  getFullDayName,
   calculateDailyAverage,
   calculateTotalCount,
   formatBestTimeValue,
@@ -18,68 +16,30 @@ import {
   formatAcceptanceRate,
   getAcceptanceRateSubtitle
 } from '@/lib/helpers/dailyStats'
-import {
-  fetchMostRecentTrip,
-  fetchDailyStats,
-  fetchDailyHourlyBreakdown,
-  fetchTimeData
-} from '@/lib/api/dailyAnalytics'
-import { Button } from '@/components/ui/button'
+import { useDailyViewData } from '@/lib/hooks/useAnalytics'
 import MostRecentTrip from '../MostRecentTrip'
 
 const DailyView = ({ selectedDay }) => {
-  const [dailyStats, setDailyStats] = useState(null)
-  const [bestTime, setBestTime] = useState(null)
-  const [busiestDay, setBusiestDay] = useState(null)
-  const [acceptanceRate, setAcceptanceRate] = useState(null)
-  const [weeklyPattern, setWeeklyPattern] = useState(null)
-  const [dailyHourlyData, setDailyHourlyData] = useState(null)
-  const [timeData, setTimeData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [typeData, setTypeData] = useState(null)
-  const [mostRecent, setMostRecent] = useState(null)
+  const {
+    dailyStats,
+    bestTime,
+    busiestDay,
+    acceptanceRate,
+    typeData,
+    dailyHourlyData,
+    timeData,
+    mostRecent,
+    isLoading
+  } = useDailyViewData(selectedDay)
 
-  useEffect(() => {
-    setIsLoading(true)
-
-    const loadData = async () => {
-      const fullDayName = selectedDay === 'all' ? 'all' : getFullDayName(selectedDay)
-      
-      const [recentTrip, hourlyData, statsData, time] = await Promise.all([
-        fetchMostRecentTrip(selectedDay, dayMapping),
-        fetchDailyHourlyBreakdown(fullDayName),
-        fetchDailyStats(selectedDay),
-        fetchTimeData(fullDayName)
-      ])
-
-      setMostRecent(recentTrip)
-      setDailyHourlyData(hourlyData)
-      setTimeData(time)
-
-      if (statsData) {
-        setDailyStats(statsData.dailyStats)
-        setBestTime(statsData.bestTime)
-        setBusiestDay(statsData.busiestDay)
-        setAcceptanceRate(statsData.acceptanceRate)
-        setTypeData(statsData.typeStats)
-        
-        if (selectedDay === 'all') {
-          const pattern = statsData.dailyStats.reduce((acc, stat) => {
-            const shortDay = formatDayDisplay(stat.day)
-            acc[shortDay] = stat
-            return acc
-          }, {})
-          setWeeklyPattern(pattern)
-        } else {
-          setWeeklyPattern(statsData.weeklyPattern)
-        }
-      }
-
-      setIsLoading(false)
-    }
-
-    loadData()
-  }, [selectedDay])
+  // Build weekly pattern for chart
+  const weeklyPattern = dailyStats && selectedDay === 'all'
+    ? dailyStats.reduce((acc, stat) => {
+        const shortDay = formatDayDisplay(stat.day)
+        acc[shortDay] = stat
+        return acc
+      }, {})
+    : null
 
   return (
     <div className="space-y-8">

@@ -6,6 +6,7 @@ import HourlyView from './views/HourlyView'
 import DailyView from './views/DailyView'
 import MonthlyView from './views/MonthlyView'
 import ZoneView from './views/ZoneView'
+import QuickInsights from './QuickInsights'
 
 const AnalyticsContainer = () => {
   const [timeFilter, setTimeFilter] = useState('daily')
@@ -37,41 +38,52 @@ const AnalyticsContainer = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-4">
-        <div className="">
-          <FilterGroup
-            title="Time Period"
-            value={timeFilter}
-            onChange={setTimeFilter}
-            options={timeOptions}
-          />
-        </div>
+      {/* Quick Insights at the top */}
+      <QuickInsights />
 
-        {timeFilter === 'daily' && (
-          <div className="">
+      {/* Filters Section */}
+      <div className="space-y-4 md:space-y-6">
+        <div className="bg-gradient-to-br from-background/80 to-background/40 border border-border rounded-xl p-4 md:p-6 shadow-xl">
+          <div className="space-y-4">
             <FilterGroup
-              title="Day Filter"
-              value={selectedDay}
-              onChange={setSelectedDay}
-              options={dayOptions}
+              title="Time Period"
+              icon="⏱️"
+              value={timeFilter}
+              onChange={setTimeFilter}
+              options={timeOptions}
             />
-          </div>
-        )}
 
-        <div className="">
-          <FilterGroup
-            title="Zones"
-            value={zoneFilter}
-            onChange={setZoneFilter}
-            options={zoneOptions}
-          />
+            {timeFilter === 'daily' && (
+              <FilterGroup
+                title="Day"
+                icon="📅"
+                value={selectedDay}
+                onChange={setSelectedDay}
+                options={dayOptions}
+              />
+            )}
+
+            {/* Hide zones for now since it's not fully implemented */}
+            {false && (
+              <FilterGroup
+                title="Zones"
+                icon="🗺️"
+                value={zoneFilter}
+                onChange={setZoneFilter}
+                options={zoneOptions}
+              />
+            )}
+          </div>
         </div>
       </div>
 
-      {timeFilter === 'hourly' && <HourlyView />}
-      {timeFilter === 'daily' && <DailyView selectedDay={selectedDay} />}
-      {timeFilter === 'monthly' && <MonthlyView />}
-      {zoneFilter !== 'all' && <ZoneView selectedDay={selectedDay} />}
+      {/* Content Views */}
+      <div className="space-y-6">
+        {timeFilter === 'hourly' && <HourlyView />}
+        {timeFilter === 'daily' && <DailyView selectedDay={selectedDay} />}
+        {timeFilter === 'monthly' && <MonthlyView />}
+        {zoneFilter !== 'all' && <ZoneView selectedDay={selectedDay} />}
+      </div>
     </div>
   )
 }

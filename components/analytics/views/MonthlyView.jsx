@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import StatCard from '../StatCard'
 import ChartCard from '../ChartCard'
 import {
@@ -7,23 +6,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useMonthlyAnalytics } from '@/lib/hooks/useAnalytics'
 
 const MonthlyView = () => {
-  const [monthlyStats, setMonthlyStats] = useState(null)
-
-  useEffect(() => {
-    const fetchMonthlyStats = async () => {
-      try {
-        const response = await fetch('/api/analytics/monthly')
-        const data = await response.json()
-        setMonthlyStats(data)
-      } catch (error) {
-        console.error('Failed to fetch monthly stats:', error)
-      }
-    }
-
-    fetchMonthlyStats()
-  }, [])
+  const { data: monthlyStats, isLoading } = useMonthlyAnalytics()
 
   const getOrdersValue = () => {
     if (!monthlyStats?.currentMonth) return '0'

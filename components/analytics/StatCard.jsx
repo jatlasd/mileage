@@ -1,12 +1,30 @@
-import { Card } from '../ui/card'
-
-const StatCard = ({ title, value, subtitle }) => {
+const StatCard = ({ title, value, subtitle, icon }) => {
   return (
-    <Card className="p-4 bg-background border-white/[0.1]">
-      <h3 className=" font-semibold mb-3 text-text">{title}</h3>
-      <div className="text-2xl lg:text-3xl font-bold text-primary">{value}</div>
-      <p className="text-sm text-text/60">{subtitle}</p>
-    </Card>
+    <div className="
+      p-4 md:p-5
+      bg-gradient-to-br from-background/80 to-background/40
+      border border-border/50
+      rounded-xl
+      shadow-lg hover:shadow-xl
+      transition-all duration-300
+      hover:scale-[1.02] active:scale-[0.98]
+      group
+    ">
+      <div className="flex items-start justify-between mb-3">
+        <h3 className="text-xs md:text-sm font-bold uppercase tracking-wide text-text/60 group-hover:text-text/80 transition-colors">
+          {title}
+        </h3>
+        {icon && (
+          <span className="text-xl md:text-2xl opacity-60 group-hover:opacity-100 transition-opacity">
+            {icon}
+          </span>
+        )}
+      </div>
+      <div className="text-3xl md:text-4xl font-bold text-primary mb-1.5 leading-none">
+        {value}
+      </div>
+      <p className="text-xs md:text-sm text-text/50 leading-relaxed">{subtitle}</p>
+    </div>
   )
 }
 
