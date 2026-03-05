@@ -28,9 +28,8 @@ const OrderHourBlock = memo(function OrderHourBlock({ hour, orders }) {
 });
 
 const TripOrders = memo(function TripOrders({ orders }) {
-  if (!orders || orders.length === 0) return null;
-
   const ordersByHour = useMemo(() => {
+    if (!orders || orders.length === 0) return {};
     const grouped = {};
     orders.forEach((order) => {
       const orderTime = new Date(order.time);
@@ -50,6 +49,8 @@ const TripOrders = memo(function TripOrders({ orders }) {
       ),
     [ordersByHour]
   );
+
+  if (!orders || orders.length === 0) return null;
 
   return (
     <div className="mt-3 pt-3 border-t border-white/[0.05]">

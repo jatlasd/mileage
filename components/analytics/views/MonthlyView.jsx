@@ -60,7 +60,7 @@ const MonthlyView = () => {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] p-4">
-              <p>Your daily order average for this month. This helps you track if you're hitting your target order volume and how many days you've worked so far.</p>
+              <p>Your daily order average for this month. This helps you track if you&apos;re hitting your target order volume and how many days you&apos;ve worked so far.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -94,7 +94,7 @@ const MonthlyView = () => {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] p-4">
-              <p>How many miles you drive per order on average. Combined with your acceptance rate, this helps you track if you're being selective enough with orders to keep your mileage down.</p>
+              <p>How many miles you drive per order on average. Combined with your acceptance rate, this helps you track if you&apos;re being selective enough with orders to keep your mileage down.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

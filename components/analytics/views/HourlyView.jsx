@@ -64,7 +64,7 @@ const HourlyView = () => {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] p-4">
-              <p>This is how many orders you typically get during this hour. The arrow tells you if it's been busier or slower lately (past 2 weeks) compared to usual.</p>
+              <p>This is how many orders you typically get during this hour. The arrow tells you if it&apos;s been busier or slower lately (past 2 weeks) compared to usual.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -81,7 +81,7 @@ const HourlyView = () => {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] p-4">
-              <p>Your golden hour! This is when you usually get the most orders. The acceptance rate here can help you decide if it's worth scheduling yourself for this time slot.</p>
+              <p>Your golden hour! This is when you usually get the most orders. The acceptance rate here can help you decide if it&apos;s worth scheduling yourself for this time slot.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
