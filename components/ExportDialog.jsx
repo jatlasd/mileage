@@ -56,6 +56,17 @@ export default function ExportDialog({ onExport }) {
     });
   };
 
+  const handleFullYearDownload = () => {
+    if (selectedYear === null) return;
+    
+    const start = new Date(selectedYear, 0, 1);
+    const end = new Date(selectedYear, 11, 31);
+    onExport({
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0]
+    });
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -103,28 +114,46 @@ export default function ExportDialog({ onExport }) {
           </div>
           
           {selectedYear && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between text-left font-normal bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]"
-                >
-                  <span>{selectedMonth !== null ? months[selectedMonth] : 'Select Month'}</span>
-                  <ChevronDown className="h-4 w-4 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[240px] bg-[#1a1b26] border border-white/[0.1] text-white/80">
-                {getAvailableMonths().map((month, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={() => handleMonthSelect(index)}
-                    className="hover:bg-[#1f2133] focus:bg-[#1f2133] focus:text-white/80"
+            <>
+              <Button 
+                className="w-full bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30" 
+                onClick={handleFullYearDownload}
+              >
+                Download Full {selectedYear}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-white/[0.1]" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-[#1a1b26] px-2 text-white/40">or select month</span>
+                </div>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between text-left font-normal bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]"
                   >
-                    {month}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <span>{selectedMonth !== null ? months[selectedMonth] : 'Select Month'}</span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[240px] bg-[#1a1b26] border border-white/[0.1] text-white/80">
+                  {getAvailableMonths().map((month, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={() => handleMonthSelect(index)}
+                      className="hover:bg-[#1f2133] focus:bg-[#1f2133] focus:text-white/80"
+                    >
+                      {month}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
 
           {selectedYear && selectedMonth !== null && (
@@ -132,7 +161,7 @@ export default function ExportDialog({ onExport }) {
               className="w-full bg-[#1a1b26] border border-white/[0.1] text-white/80 hover:bg-[#1f2133]" 
               onClick={handleDownload}
             >
-              Download CSV
+              Download {months[selectedMonth]} CSV
             </Button>
           )}
         </div>
