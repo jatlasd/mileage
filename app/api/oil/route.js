@@ -2,6 +2,8 @@ import connectToDb from "@/lib/mongodb";
 import OilChange from "@/models/oilChange";
 import { NextResponse } from "next/server";
 
+const getLastOilChange = () => OilChange.findOne().sort({ lastChange: -1, _id: -1 });
+
 export const POST = async (request) => {
   try {
     await connectToDb();
@@ -25,7 +27,7 @@ export const PATCH = async (request) => {
   try {
     await connectToDb();
     const body = await request.json();
-    const lastOilChange = await OilChange.findOne().sort({ date: -1 });
+    const lastOilChange = await getLastOilChange();
 
     if (!lastOilChange) {
       return NextResponse.json(
@@ -62,7 +64,7 @@ export const PATCH = async (request) => {
 export const GET = async () => {
   try {
     await connectToDb();
-    const lastOilChange = await OilChange.findOne().sort({ date: -1 });
+    const lastOilChange = await getLastOilChange();
     return NextResponse.json(lastOilChange);
   } catch (error) {
     return NextResponse.json(

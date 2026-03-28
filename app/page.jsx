@@ -1,24 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatDuration } from '@/lib/utils';
-import { Pause, Play, Plus } from 'lucide-react';
+import { Pause, Play } from 'lucide-react';
 import OrderDialog from '@/components/OrderDialog';
 import UpdateMileageDialog from '@/components/UpdateMileageDialog';
 import { checkOil } from '@/lib/checkOil';
 
+const formatOilChangeDate = (value) => {
+  if (!value) return 'No recorded date';
+
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'America/New_York',
+  });
+};
 
 export default function HomePage() {
   const [mileage, setMileage] = useState('');
   const [activeTrip, setActiveTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBreakLoading, setIsBreakLoading] = useState(false);
-  const [isOrderLoading, setIsOrderLoading] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedZone, setSelectedZone] = useState('')
   const [isOtherZone, setIsOtherZone] = useState(false)
   const [otherZone, setOtherZone] = useState('')
   const [needsOilChange, setNeedsOilChange] = useState(false)
+  const [lastOilChange, setLastOilChange] = useState(null)
 
   const buttonClass = 'relative px-4 py-3 border-2 border-text/50 rounded-xl text-lg bg-text/10 w-full transition-all duration-200 active:scale-[0.98]'
   const selectedButtonClass = `${buttonClass} border-primary bg-primary/20 border-primary text-primary`
@@ -50,18 +58,12 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (activeTrip) {
-      const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-      return () => clearInterval(timer);
-    }
-  }, [activeTrip]);
-
-  useEffect(() => {
     const checkOilStatus = async () => {
       try {
         const res = await fetch('/api/oil')
         const data = await res.json()
-        setNeedsOilChange(data.currentlyNeeds || false)
+        setNeedsOilChange(data?.currentlyNeeds || false)
+        setLastOilChange(data || null)
       } catch (error) {
         console.error('Error checking oil status:', error)
       }
@@ -143,16 +145,16 @@ export default function HomePage() {
     }
   };
 
-const handleSelectZone = (zone) => {
-  if (zone === 'other') {
-    setIsOtherZone(true);
-    setSelectedZone('');
-  } else {
-    setSelectedZone(zone);
-    setIsOtherZone(false);
-    setOtherZone('');
+  const handleSelectZone = (zone) => {
+    if (zone === 'other') {
+      setIsOtherZone(true);
+      setSelectedZone('');
+    } else {
+      setSelectedZone(zone);
+      setIsOtherZone(false);
+      setOtherZone('');
+    }
   }
-}
 
   if (isLoading) {
     return <div className="min-h-[100dvh] bg-background text-text flex items-center justify-center">
@@ -161,8 +163,6 @@ const handleSelectZone = (zone) => {
   }
 
   const activeBreak = activeTrip?.breaks?.find(b => !b.endTime);
-  const totalBreakDuration = activeTrip?.totalBreakDuration || 0;
-
   return (
     <div className="min-h-[100dvh] bg-background text-text flex flex-col">
       <div className="flex-1 flex flex-col p-5 pt-6">
@@ -171,9 +171,37 @@ const handleSelectZone = (zone) => {
         </h1>
         
         <div className='flex justify-center w-full'>
-        <UpdateMileageDialog needsOilChange={needsOilChange} />
-
-          </div>        
+          <UpdateMileageDialog needsOilChange={needsOilChange} />
+        </div>
+        <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-base font-medium text-text/80">Last Oil Change</h2>
+              <p className="text-sm text-text/50">
+                {lastOilChange?.lastChange ? 'Most recently recorded service' : 'No oil change has been recorded yet'}
+              </p>
+            </div>
+            {needsOilChange && (
+              <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">
+                Due now
+              </span>
+            )}
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-black/10 p-3">
+              <p className="text-xs uppercase tracking-wide text-text/40">Mileage</p>
+              <p className="mt-1 text-xl font-mono text-primary">
+                {lastOilChange?.mileage ?? '--'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-black/10 p-3">
+              <p className="text-xs uppercase tracking-wide text-text/40">Date</p>
+              <p className="mt-1 text-sm font-medium text-text/85">
+                {formatOilChangeDate(lastOilChange?.lastChange)}
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
           <h2 className="text-base font-medium mb-3 text-text/80">
             {activeTrip ? 'Current Trip' : 'Start New Trip'}
