@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+const formatOilChangeDate = (dateString) => {
+  if (!dateString) {
+    return null;
+  }
+
+  const date = new Date(dateString);
+  const estDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "America/New_York" })
+  );
+
+  return estDate.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const UpdateMileageDialog = ({ needsOilChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,14 +60,8 @@ const UpdateMileageDialog = ({ needsOilChange }) => {
     const fetchOil = async () => {
       const response = await fetch("/api/oil");
       const data = await response.json();
-      if (data.lastChange) {
-        const date = new Date(data.lastChange);
-        const estDate = new Date(
-          date.toLocaleString("en-US", { timeZone: "America/New_York" })
-        );
-        const month = estDate.toLocaleString("en-US", { month: "long" });
-        const formattedDate = `${month} ${estDate.getDate()}, ${estDate.getFullYear()}`;
-        setLastChangeDate(formattedDate);
+      if (data?.lastChange) {
+        setLastChangeDate(formatOilChangeDate(data.lastChange));
         setOldMileage(data.mileage);
       }
     };
