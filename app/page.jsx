@@ -6,11 +6,11 @@ import OrderDialog from '@/components/OrderDialog';
 import UpdateMileageDialog from '@/components/UpdateMileageDialog';
 import { checkOil } from '@/lib/checkOil';
 
-const formatOilChangeDate = (value) => {
-  if (!value) return 'No recorded date';
+const formatOilChangeDateShort = (value) => {
+  if (!value) return '—';
 
   return new Date(value).toLocaleDateString('en-US', {
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
     timeZone: 'America/New_York',
@@ -170,39 +170,23 @@ export default function HomePage() {
           Delivery Mileage Tracker
         </h1>
         
-        <div className="bg-white/[0.04] rounded-lg p-3 mb-4 border border-white/[0.05]">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-medium text-text/70">Oil change</h2>
-                {needsOilChange && (
-                  <span className="rounded-full bg-red-500/12 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-red-300">
-                    Due now
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-text/45">
-                {lastOilChange?.lastChange
-                  ? `Last service at ${lastOilChange.mileage} miles on ${formatOilChangeDate(lastOilChange.lastChange)}`
-                  : 'No oil change has been recorded yet'}
-              </p>
+        <div className="mb-3 rounded-md border border-white/[0.05] bg-white/[0.04] px-2.5 py-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
+              <span className="text-xs font-medium text-text/70">Oil change</span>
+              {needsOilChange && (
+                <span className="shrink-0 rounded-full bg-red-500/12 px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-red-300">
+                  Due
+                </span>
+              )}
             </div>
             <UpdateMileageDialog needsOilChange={needsOilChange} />
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="rounded-md bg-black/10 p-2.5">
-              <p className="text-xs uppercase tracking-wide text-text/40">Mileage</p>
-              <p className="mt-1 text-lg font-mono text-text/85">
-                {lastOilChange?.mileage ?? '--'}
-              </p>
-            </div>
-            <div className="rounded-md bg-black/10 p-2.5">
-              <p className="text-xs uppercase tracking-wide text-text/40">Date</p>
-              <p className="mt-1 text-xs font-medium text-text/75">
-                {formatOilChangeDate(lastOilChange?.lastChange)}
-              </p>
-            </div>
-          </div>
+          <p className="mt-0.5 truncate text-[11px] tabular-nums text-text/50">
+            {lastOilChange?.lastChange
+              ? `${lastOilChange.mileage} mi · ${formatOilChangeDateShort(lastOilChange.lastChange)}`
+              : 'No oil change recorded'}
+          </p>
         </div>
         <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
           <h2 className="text-base font-medium mb-3 text-text/80">
