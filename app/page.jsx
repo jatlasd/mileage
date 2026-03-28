@@ -170,33 +170,35 @@ export default function HomePage() {
           Delivery Mileage Tracker
         </h1>
         
-        <div className='flex justify-center w-full'>
-          <UpdateMileageDialog needsOilChange={needsOilChange} />
-        </div>
-        <div className="bg-white/[0.07] rounded-xl p-4 mb-6 backdrop-blur-sm border border-white/[0.05]">
-          <div className="flex items-center justify-between gap-4">
+        <div className="bg-white/[0.04] rounded-lg p-3 mb-4 border border-white/[0.05]">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-base font-medium text-text/80">Last Oil Change</h2>
-              <p className="text-sm text-text/50">
-                {lastOilChange?.lastChange ? 'Most recently recorded service' : 'No oil change has been recorded yet'}
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-medium text-text/70">Oil change</h2>
+                {needsOilChange && (
+                  <span className="rounded-full bg-red-500/12 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-red-300">
+                    Due now
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-text/45">
+                {lastOilChange?.lastChange
+                  ? `Last service at ${lastOilChange.mileage} miles on ${formatOilChangeDate(lastOilChange.lastChange)}`
+                  : 'No oil change has been recorded yet'}
               </p>
             </div>
-            {needsOilChange && (
-              <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-300">
-                Due now
-              </span>
-            )}
+            <UpdateMileageDialog needsOilChange={needsOilChange} />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-black/10 p-3">
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-md bg-black/10 p-2.5">
               <p className="text-xs uppercase tracking-wide text-text/40">Mileage</p>
-              <p className="mt-1 text-xl font-mono text-primary">
+              <p className="mt-1 text-lg font-mono text-text/85">
                 {lastOilChange?.mileage ?? '--'}
               </p>
             </div>
-            <div className="rounded-lg bg-black/10 p-3">
+            <div className="rounded-md bg-black/10 p-2.5">
               <p className="text-xs uppercase tracking-wide text-text/40">Date</p>
-              <p className="mt-1 text-sm font-medium text-text/85">
+              <p className="mt-1 text-xs font-medium text-text/75">
                 {formatOilChangeDate(lastOilChange?.lastChange)}
               </p>
             </div>
