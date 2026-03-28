@@ -73,9 +73,13 @@ const UpdateMileageDialog = ({ needsOilChange }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" className="w-1/2 md:w-1/4 mb-6 gap-2">
-          <AlertCircle className="w-4 h-4" />
-          Oil Change Needed
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-auto rounded-full border border-red-500/20 bg-red-500/8 px-2.5 py-1 text-[11px] font-medium text-red-200 hover:bg-red-500/14 hover:text-red-100"
+        >
+          <AlertCircle className="w-3.5 h-3.5" />
+          Log service
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-[#1a1b26] border border-white/[0.1]">
