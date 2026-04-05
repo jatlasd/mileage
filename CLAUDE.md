@@ -47,7 +47,7 @@ Three main Mongoose models in the `models/` directory:
 
 2. **Income** (`models/income.js`) - Weekly income tracking by month
 
-3. **OilChange** (`models/oilChange.js`) - Tracks mileage for oil change reminders (5000-mile intervals)
+3. **OilChange** (`models/oilChange.js`) - Tracks mileage for oil change reminders (3000-mile intervals)
 
 ### API Structure
 
@@ -79,7 +79,7 @@ API routes in `app/api/` follow RESTful patterns:
 - `paginateTrips()` - Handles filtering by period/year and pagination
 - `formatDayHeader()`, `getDayTotal()` - Trip grouping and display
 
-**`lib/checkOil.js`** - Checks if vehicle needs oil change based on 5000-mile threshold
+**`lib/checkOil.js`** - Checks if vehicle needs oil change based on 3000-mile threshold
 
 **`lib/analyticUtils.js`** - Analytics data processing functions
 
