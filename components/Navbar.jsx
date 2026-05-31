@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, BarChart2, List, PiggyBank, ChartSpline, Car, IdCard, Trophy } from 'lucide-react';
+import { List, PiggyBank, ChartSpline, IdCard, Trophy, History } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -39,6 +39,13 @@ export default function Navbar() {
         >
           <ChartSpline className="h-4 w-4" />
           Analytics
+        </Link>
+        <Link 
+          href="/history" 
+          className="flex items-center gap-2 hover:text-primary transition-colors duration-200"
+        >
+          <History className="h-4 w-4" />
+          History
         </Link>
       </div>
     </div>
