@@ -8,7 +8,7 @@ import MonthlyDetailsTab from './tabs/MonthlyDetailsTab'
 import ValidationTab from './tabs/ValidationTab'
 
 const TaxSummaryContainer = () => {
-  const [selectedYear, setSelectedYear] = useState('2025')
+  const [selectedYear, setSelectedYear] = useState('2026')
   const [activeTab, setActiveTab] = useState('overview')
 
   // Fetch tax summary data for selected year
@@ -23,6 +23,7 @@ const TaxSummaryContainer = () => {
 
   // Year options (can be dynamically fetched later)
   const yearOptions = [
+    { value: '2026', label: '2026' },
     { value: '2025', label: '2025' },
     { value: '2024', label: '2024' }
   ]

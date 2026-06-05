@@ -4,10 +4,18 @@ import StatCard from '@/components/analytics/StatCard'
 import OdometerDisplay from '../OdometerDisplay'
 import MonthlyMilesChart from '../charts/MonthlyMilesChart'
 
+const MILEAGE_RATES = {
+  2024: 0.67,
+  2025: 0.70,
+  2026: 0.725,
+}
+
 const OverviewTab = ({ yearSummary, monthlyBreakdown, isLoading }) => {
   if (isLoading || !yearSummary) {
     return <div className="text-text/60">Loading overview...</div>
   }
+
+  const mileageRate = MILEAGE_RATES[yearSummary.year] ?? 0.70
 
   // Format dates
   const formatDate = (dateString) => {
@@ -91,8 +99,10 @@ const OverviewTab = ({ yearSummary, monthlyBreakdown, isLoading }) => {
         </h2>
         <div className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b border-border/30">
-            <span className="text-text/70">Standard Mileage Rate (2025)</span>
-            <span className="text-text font-semibold">$0.70 per mile</span>
+            <span className="text-text/70">Standard Mileage Rate ({yearSummary.year})</span>
+            <span className="text-text font-semibold">
+              {mileageRate.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 3 })} per mile
+            </span>
           </div>
           <div className="flex justify-between items-center py-2 border-b border-border/30">
             <span className="text-text/70">Total Business Miles</span>
@@ -101,7 +111,7 @@ const OverviewTab = ({ yearSummary, monthlyBreakdown, isLoading }) => {
           <div className="flex justify-between items-center py-3 bg-primary/10 rounded-lg px-4">
             <span className="text-text font-bold">Estimated Deduction</span>
             <span className="text-primary font-bold text-xl">
-              {formatCurrency(yearSummary.totalBusinessMiles * 0.70)}
+              {formatCurrency(yearSummary.totalBusinessMiles * mileageRate)}
             </span>
           </div>
           <p className="text-xs text-text/50 mt-2">
